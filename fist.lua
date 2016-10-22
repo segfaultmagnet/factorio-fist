@@ -73,9 +73,10 @@ function FoGunBlankCheck(player_index)
     -- Check selected entity's inventories, except when selected entity is
     -- another player. This method should be replaced with one which only checks
     -- the inventory of an entity whose inventory is currently open on-screen,
-    -- if possible.
+    -- if possible. Also, double-check on whether sel.name would return "character"
+    -- or "player". One of them will not be necessary.
     local sel = player.selected
-    if sel ~= nil and sel.valid and sel.player == nil then    
+    if sel ~= nil and sel.valid and sel.name ~= "character" and sel.name ~= "player" then    
       for i = 1, 8 do
         local sel_inv = sel.get_inventory(i)
         if sel_inv ~= nil and sel_inv.is_empty() == false then
