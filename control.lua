@@ -14,6 +14,8 @@ cases (e.g. put into another entity's inventory with shift-click or ctrl-click).
 ----------------------------------------
 To-Do:
 
+Add Fire Direction Center entities.
+Add mortar entities.
 Implement fire mission functionality.
 ----------------------------------------
 --]]
@@ -21,6 +23,7 @@ Implement fire mission functionality.
 require("stdlib.area.position")
 require("stdlib.event.event")
 require("stdlib.gui.gui")
+require("stdlib.string")
 require("stdlib.table")
 require("fist")
 require("gui")
@@ -41,7 +44,6 @@ trp_counter = {1, 1, 0}
 
 local new_trp_player_index = nil
 local new_trp_pos = nil
-local trp
 
 -- Post: Check for fo-gun blanks each tick.
 --       Check if the player has marked a new target with his/her fo-gun.
@@ -84,11 +86,11 @@ Event.register(defines.events.on_gui_click, function(event)
   local element = event.element
   local player = game.players[event.player_index]
 
-  if string.find(element.name, "button_fire") then
+  if string.contains(element.name, "button_fire") then
     OnFireMission(event.player_index)
-  elseif string.find(element.name, "button_del") then
+  elseif string.contains(element.name, "button_del") then
     OnDeleteButton(event.player_index)
-  elseif string.find(element.name, "button_exit") then
+  elseif string.contains(element.name, "button_exit") then
     ExitFistController(event.player_index)
   end
 end)
@@ -99,7 +101,6 @@ if DEBUG == true then
     if game ~= nil then
       local p = game.players[event.player_index]
       p.character.insert({name="fo-gun",count=1})
-      p.character.insert({name="fo-gun-blank",count=1})
     end
   end)
 end

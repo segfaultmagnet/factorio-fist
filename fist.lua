@@ -62,11 +62,29 @@ end
 function FoGunBlankCheck(player_index)
   local player = game.players[player_index]
   if player ~= nil then
+    -- Check player's inventories.
     inv_guns = player.get_inventory(defines.inventory.player_guns)
     if inv_guns ~= nil and inv_guns.find_item_stack("fo-gun") ~= nil then
       SetBlanks(player_index, 1)
     else
       SetBlanks(player_index, 0)
+    end
+
+    -- Check selected entity's inventories, except when selected entity is
+    -- another player. This method should be replaced with one which only checks
+    -- the inventory of an entity whose inventory is currently open on-screen,
+    -- if possible.
+    local sel = player.selected
+    if sel ~= nil and sel.valid and sel.player == nil then    
+      for i = 1, 8 do
+        local sel_inv = sel.get_inventory(i)
+        if sel_inv ~= nil and sel_inv.is_empty() == false then
+          while sel_inv.get_item_count("fo-gun-blank") > 0 do
+            local stack = sel_inv.find_item_stack("fo-gun-blank")
+            stack.clear()
+          end
+        end
+      end
     end
   end
 end
@@ -83,8 +101,8 @@ end
 
 -- Post: Returns a position as a string with truncated coordinates.
 function FormatPosition(pos)
-  x_coord = tonumber(string.format("%.1f",pos.x))
-  y_coord = tonumber(string.format("%.1f",pos.y))
+  local x_coord = tonumber(string.format("%.1f",pos.x))
+  local y_coord = tonumber(string.format("%.1f",pos.y))
   return "("..x_coord..", "..y_coord..")"
 end
 
@@ -138,13 +156,13 @@ end
 --       to count. Removes any found in their main inventory or cursor stack.
 function SetBlanks(player_index, count)
   local player = game.players[player_index]
-  inv_main = player.get_inventory(defines.inventory.player_main)
-  inv_ammo = player.get_inventory(defines.inventory.player_ammo)
-  cursor_stack = player.cursor_stack
+  local inv_main = player.get_inventory(defines.inventory.player_main)
+  local inv_ammo = player.get_inventory(defines.inventory.player_ammo)
+  local cursor_stack = player.cursor_stack
 
   -- Remove any blanks from main inventory.
   while inv_main.get_item_count("fo-gun-blank") > 0 do
-    stack = inv_main.find_item_stack("fo-gun-blank")
+    local stack = inv_main.find_item_stack("fo-gun-blank")
     if stack ~= nil then
       stack.clear()
     end
@@ -157,7 +175,7 @@ function SetBlanks(player_index, count)
 
   -- Set number of blanks in ammo inventory to count.
   if inv_ammo.get_item_count("fo-gun-blank") ~= count then
-    stack = inv_ammo.find_item_stack("fo-gun-blank")
+    local stack = inv_ammo.find_item_stack("fo-gun-blank")
     if count > 0 then
       if stack == nil then
         inv_ammo.insert({name="fo-gun-blank", count=count})
