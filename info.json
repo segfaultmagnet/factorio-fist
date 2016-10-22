@@ -1,0 +1,12 @@
+{
+  "name":"FIST",
+  "version":"0.1.0",
+  "title":"Fire Support Team",
+  "author":"Matthew Sheridan",
+  "contact":"segfaultmagnet@users.noreply.github.com",
+  "homepage":"https://github.com/segfaultmagnet/",
+  "description":"Adds indirect fire support for the discerning bug squisher.",
+  "license":"Beer-Ware License Rev. 42",
+  "dependencies":["base"],
+  "factorio_version":"0.13"
+}
