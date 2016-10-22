@@ -12,8 +12,7 @@ data:extend(
     {
       type = "projectile",
       ammo_category = "blank",
-      -- cooldown = 100,
-      cooldown = 10,
+      cooldown = 100,
       damage_modifier = 0,
       movement_slow_down_factor = 0,
       projectile_creation_distance = 1,
