@@ -14,6 +14,10 @@ data:extend(
 --]]
       {
         type = "unlock-recipe",
+        recipe = "fdc"
+      },
+      {
+        type = "unlock-recipe",
         recipe = "fo-gun"
       }
     },

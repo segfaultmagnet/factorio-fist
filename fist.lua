@@ -24,16 +24,7 @@ function AddTargetReference(player_index, key, pos)
     end
 
     if i > MAX_TRP then
-      -- Auto remove oldest TRP if this functionality is desired.
-      if auto_remove_trp then
-        for k,v in pairs(trp) do
-          RemoveTargetReference(player_index, k)
-          break
-        end
-      -- Otherwise: don't!
-      else
-        player.print("TRP not assigned: too many targets.")
-      end
+      player.print("TRP not assigned: too many targets.")
     else
       trp[key] = pos
       player.print("TRP designated: "..key)
@@ -52,6 +43,50 @@ function RemoveTargetReference(player_index, key)
   else
     trp[key] = nil
     player.print("TRP "..key.." unassigned.")
+  end
+end
+
+-- Post: Adds new TRP if determined that current player added it.
+function EvaluateNewTargets(player_index, pos)
+  local player = game.players[player_index]
+  AddTargetReference(player_index, GenerateTargetReference(), pos)
+  ShowTrpController(player_index)
+end
+
+-- Pre:  Called when there at least one fire mission queued.
+-- Post: Determines which FDC will handle the 
+function ExecuteFireMissions(player_index)
+  local player = game.players[player_index]
+  while #fire_mission_queue > 0 do
+
+    local i = 0
+    for _,v in pairs(fire_mission_queue) do
+      local nearest_fdc = nil
+      local ranges = {}
+      i = i + 1
+
+      -- Determine distances to TRP from each FDC.
+      for _,w in pairs(fdc) do
+        new_range = Position.distance(w[2].position, trp[v])
+        if new_range <= MAX_RANGE_60 then
+          table.insert(ranges, new_range)
+        end
+        if new_range == table.min(ranges) then
+          nearest_fdc = w[1]
+        end
+      end
+
+      -- If there is an FDC in range of the TRP, give the current mission to the
+      -- nearest one for firing.
+      if nearest_fdc ~= nil then
+        -- Fire here.
+        player.print("FDC "..nearest_fdc.." fires "..v)
+      else
+        player.print("No FDC within range of "..v)
+      end
+
+      table.remove(fire_mission_queue, i)
+    end
   end
 end
 
@@ -102,16 +137,41 @@ end
 
 -- Post: Returns a position as a string with truncated coordinates.
 function FormatPosition(pos)
-  local x_coord = tonumber(string.format("%.1f",pos.x))
-  local y_coord = tonumber(string.format("%.1f",pos.y))
-  return "("..x_coord..", "..y_coord..")"
+  local x = string.format("%.1f",pos.x)
+  local y = string.format("%.1f",pos.y)
+  if not string.contains(x, ".") then
+    x = x..".0"
+  end
+  if not string.contains(y, ".") then
+    y = y..".0"
+  end
+  return "("..x..", "..y..")"
+end
+
+-- Post: Generates a new, unique name for each FDC.
+function GenerateFdcName()
+  local key
+  repeat
+    -- Increment identifier.
+    fdc_counter[2] = fdc_counter[2] + 1
+    if fdc_counter[2] > 26 then
+      fdc_counter[2] = 1
+      fdc_counter[1] = fdc_counter[1] + 1
+    end
+    if fdc_counter[1] > 26 then
+      fdc_counter[1] = 1
+    end
+
+    -- New key.
+    key = PHONETIC[fdc_counter[1]].." "..PHONETIC[fdc_counter[2]]
+  until fdc[key] == nil
+  return key
 end
 
 -- Post: Generates a new, unique key for use in trp.
 function GenerateTargetReference()
   local key
   repeat
-    key = ALPHA[trp_counter[1]]..ALPHA[trp_counter[2]]..tostring(trp_counter[3])
     -- Increment identifier.
     trp_counter[3] = trp_counter[3] + 1
     if trp_counter[3] > 9 then
@@ -125,6 +185,9 @@ function GenerateTargetReference()
     if trp_counter[1] > 26 then
       trp_counter[1] = 1
     end
+
+    -- New key.
+    key = ALPHA[trp_counter[1]]..ALPHA[trp_counter[2]]..tostring(trp_counter[3])
   until trp[key] == nil
   return key
 end
@@ -142,15 +205,42 @@ end
 
 -- Pre:  player_index is the player calling fire.
 -- Post: Executes fire mission against currently selected TRP.
-function OnFireMission(player_index)
+function OnFireButton(player_index)
   local list = game.players[player_index].gui.center.trp_ctrl.left_flow.list
   for k,v in pairs(list.children_names) do
     if list[v].checkbox.state == true then
-      -- Fire mission
-      game.players[player_index].print("Firing mission "..v)
+      table.insert(fire_mission_queue, v)
     end
   end
+  ExecuteFireMissions(player_index)
   ShowTrpController(player_index)
+end
+
+-- Pre:  Called when an FDC is placed, either by player or robot.
+-- Post: New name for FDC is generated and a table of name and entity pointer
+--       are appended to fdc.
+function OnFdcPlaced(event)
+  local new_fdc_name = GenerateFdcName()
+  table.insert(fdc, {new_fdc_name, event.created_entity})
+  if event.player_index ~= nil then
+    game.players[event.player_index].print("New FDC "..new_fdc_name)
+  --[[
+  -- Check to see how to get force that robot is on.
+  elseif event.robot ~= nil then
+    Game.print_force(event.robot.force).print("New FDC "..new_fdc_name)
+  --]]
+  end
+end
+
+-- Pre:  Called when an FDC is destroyed.
+-- Post: FDC is removed from fdc.
+function OnFdcDestroyed(event)
+  local entity = event.entity
+  for k,v in pairs(fdc) do
+    if v[2] == entity then
+      table.remove(fdc, k)
+    end
+  end
 end
 
 -- Post: Sets the number of fo-gun-blank rounds in the player's ammo inventory
