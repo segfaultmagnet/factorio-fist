@@ -2,7 +2,7 @@
 Name:         control.lua
 Authors:      Matthew Sheridan
 Date:         20 October 2016
-Revision:     22 October 2016
+Revision:     23 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 
@@ -15,9 +15,6 @@ To-Do:
 Add Fire Direction Center entities.
 Add mortar entities.
 Implement fire mission functionality.
-
-Needs more handling for fo-gun-blank leaving the player's inventory for uncommon
-cases (e.g. put into another entity's inventory with shift-click or ctrl-click).
 ----------------------------------------
 --]]
 
@@ -39,18 +36,20 @@ PHONETIC = {"Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel",
            "X-ray","Yankee","Zulu"}
 MAX_TRP = 8
 
-MAX_RANGE_60 = 50
+MAX_RANGE = {}
+MAX_RANGE["mortar-60"] = 50
+FDC_CONTROL_RADIUS = 3
 
 -- Table of Fire Direction Centers and counters for naming.
-fdc = {}
-fdc_counter = {1, 0}
+global.fdc = {}
+global.fdc_counter = {1, 0}
+
+-- Table of Target Reference Points and counters for naming.
+global.trp = {}
+global.trp_counter = {1, 1, -1}
 
 -- Table of queued Fire Missions.
 fire_mission_queue = {}
-
--- Table of Target Reference Points and counters for naming.
-trp = {}
-trp_counter = {1, 1, -1}
 
 local new_trp_player_index = nil
 local new_trp_pos = nil
@@ -130,11 +129,18 @@ end)
 if DEBUG == true then
   Event.register(defines.events.on_player_created, function(event)
     if game ~= nil then
-      local p = game.players[event.player_index]
-      p.character.insert({name="fo-gun",count=1})
-      p.character.insert({name="fdc",count=5})
-      p.character.insert({name="solar-panel",count=1})
-      p.character.insert({name="medium-electric-pole",count=3})
+      local player = game.players[event.player_index]
+      for i = 1, 8 do
+        if player.get_inventory(i) ~= nil then
+          player.get_inventory(i).clear()
+        end
+      end
+      player.character.insert({name="fo-gun",count=1})
+      player.character.insert({name="fdc",count=5})
+      player.character.insert({name="mortar-60",count=20})
+      player.character.insert({name="mortar-60-he",count=30})
+      player.character.insert({name="grenade",count=20})
+      player.character.insert({name="steel-axe",count=3})
     end
   end)
 end

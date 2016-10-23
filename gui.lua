@@ -2,7 +2,7 @@
 Name:         gui.lua
 Authors:      Matthew Sheridan
 Date:         21 October 2016
-Revision:     22 October 2016
+Revision:     23 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 
@@ -112,7 +112,7 @@ function GuiTrpController(player_index)
     horizontal_scroll_policy = "never",
     vertical_scroll_policy = "always"
   }
-  for k,v in pairs(trp) do
+  for k,v in pairs(global.trp) do
     local foo = player_gui.trp_ctrl.left_flow.list.add
     {
       type = "flow",

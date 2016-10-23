@@ -1,5 +1,6 @@
 require("prototypes.entity.entities")
 require("prototypes.entity.indirect")
+require("prototypes.entity.projectiles")
 require("prototypes.item.ammo")
 require("prototypes.item.gun")
 require("prototypes.item.indirect")

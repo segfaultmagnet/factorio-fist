@@ -6,15 +6,17 @@ data:extend(
     icon = "__FIST__/graphics/technology/fist.png",
     effects =
     {
---[[
+      {
+        type = "unlock-recipe",
+        recipe = "fdc"
+      },
       {
         type = "unlock-recipe",
         recipe = "mortar-60"
       },
---]]
       {
         type = "unlock-recipe",
-        recipe = "fdc"
+        recipe = "mortar-60-he"
       },
       {
         type = "unlock-recipe",

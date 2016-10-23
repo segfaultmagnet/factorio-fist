@@ -2,7 +2,7 @@
 Name:         fist.lua
 Authors:      Matthew Sheridan
 Date:         22 October 2016
-Revision:     22 October 2016
+Revision:     23 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 
@@ -19,14 +19,14 @@ function AddTargetReference(player_index, key, pos)
 
   if MAX_TRP > 0 then
     local i = 0
-    for k,v in pairs(trp) do
+    for k,v in pairs(global.trp) do
       i = i + 1
     end
 
     if i > MAX_TRP then
       player.print("TRP not assigned: too many targets.")
     else
-      trp[key] = pos
+      global.trp[key] = pos
       player.print("TRP designated: "..key)
     end
   end
@@ -38,10 +38,10 @@ function RemoveTargetReference(player_index, key)
   local player = game.players[player_index]
   if key == nil then
     player.print("No TRP selected.")
-  elseif trp[key] == nil then
+  elseif global.trp[key] == nil then
     player.print(key.." is not a valid TRP.")
   else
-    trp[key] = nil
+    global.trp[key] = nil
     player.print("TRP "..key.." unassigned.")
   end
 end
@@ -55,24 +55,26 @@ end
 
 -- Pre:  Called when there at least one fire mission queued.
 -- Post: Determines which FDC will handle the 
-function ExecuteFireMissions(player_index)
+function ExecuteFireMissions(player_index, gun_type)
   local player = game.players[player_index]
   while #fire_mission_queue > 0 do
 
     local i = 0
     for _,v in pairs(fire_mission_queue) do
       local nearest_fdc = nil
+      local nearest_pos = nil
       local ranges = {}
       i = i + 1
 
       -- Determine distances to TRP from each FDC.
-      for _,w in pairs(fdc) do
-        new_range = Position.distance(w[2].position, trp[v])
-        if new_range <= MAX_RANGE_60 then
+      for _,w in pairs(global.fdc) do
+        new_range = Position.distance(w[2].position, global.trp[v])
+        if new_range <= MAX_RANGE[gun_type] then
           table.insert(ranges, new_range)
         end
         if new_range == table.min(ranges) then
           nearest_fdc = w[1]
+          nearest_pos = w[2].position
         end
       end
 
@@ -80,14 +82,40 @@ function ExecuteFireMissions(player_index)
       -- nearest one for firing.
       if nearest_fdc ~= nil then
         -- Fire here.
-        player.print("FDC "..nearest_fdc.." fires "..v)
+        local guns = GetFdcGuns(nearest_pos, gun_type)
+        local round_type = "HE"
+        local round_count = 3
+        MessageToObserver(player_index, nearest_fdc, #guns, round_type, round_count, v)
+        -- player.print("FDC "..nearest_fdc.." fires "..v)
+        -- Game.print_all("Found "..#guns.." "..gun_type.." near "..nearest_fdc)
       else
-        player.print("No FDC within range of "..v)
+        player.print("No FDC within range of "..v"!")
       end
 
       table.remove(fire_mission_queue, i)
     end
   end
+end
+
+-- Pre:  fdc_pos is the position of that FDC.
+--       gun_type is the name of the guns to be searched for (e.g. "mortar-60").
+-- Post: Returns a table of all guns within the FDC's control radius.
+function GetFdcGuns(fdc_pos, gun_type)
+  local guns = {}
+  local bound =
+  {
+    left_top = { fdc_pos.x - FDC_CONTROL_RADIUS, fdc_pos.y - FDC_CONTROL_RADIUS },
+    right_bottom = { fdc_pos.x + FDC_CONTROL_RADIUS, fdc_pos.y + FDC_CONTROL_RADIUS }
+  }
+  local nearby = game.surfaces["nauvis"].find_entities_filtered{area = bound, name = gun_type}
+  local i = 0
+  for k,v in pairs(nearby) do
+    i = i + 1
+    if Position.distance(fdc_pos, v.position) < FDC_CONTROL_RADIUS then
+      table.insert(guns, v)
+    end
+  end
+  return guns
 end
 
 -- Post: Checks to see if the player has fo-gun in their gun inventory or if
@@ -110,8 +138,8 @@ function FoGunBlankCheck(player_index)
     -- the inventory of an entity whose inventory is currently open on-screen,
     -- if possible. Also, double-check on whether sel.name would return "character"
     -- or "player". One of them will not be necessary.
-    local sel = player.selected
-    if sel ~= nil and sel.valid and sel.name ~= "character" and sel.name ~= "player" then    
+    local sel = player.opened
+    if sel ~= nil and sel.valid and sel.name ~= "character" and sel.name ~= "player" then
       for i = 1, 8 do
         local sel_inv = sel.get_inventory(i)
         if sel_inv ~= nil and sel_inv.is_empty() == false then
@@ -153,18 +181,18 @@ function GenerateFdcName()
   local key
   repeat
     -- Increment identifier.
-    fdc_counter[2] = fdc_counter[2] + 1
-    if fdc_counter[2] > 26 then
-      fdc_counter[2] = 1
-      fdc_counter[1] = fdc_counter[1] + 1
+    global.fdc_counter[2] = global.fdc_counter[2] + 1
+    if global.fdc_counter[2] > 26 then
+      global.fdc_counter[2] = 1
+      global.fdc_counter[1] = global.fdc_counter[1] + 1
     end
-    if fdc_counter[1] > 26 then
-      fdc_counter[1] = 1
+    if global.fdc_counter[1] > 26 then
+      global.fdc_counter[1] = 1
     end
 
     -- New key.
-    key = PHONETIC[fdc_counter[1]].." "..PHONETIC[fdc_counter[2]]
-  until fdc[key] == nil
+    key = PHONETIC[global.fdc_counter[1]].." "..PHONETIC[global.fdc_counter[2]]
+  until global.fdc[key] == nil
   return key
 end
 
@@ -173,23 +201,33 @@ function GenerateTargetReference()
   local key
   repeat
     -- Increment identifier.
-    trp_counter[3] = trp_counter[3] + 1
-    if trp_counter[3] > 9 then
-      trp_counter[3] = 0
-      trp_counter[2] = trp_counter[2] + 1
+    global.trp_counter[3] = global.trp_counter[3] + 1
+    if global.trp_counter[3] > 9 then
+      global.trp_counter[3] = 0
+      global.trp_counter[2] = global.trp_counter[2] + 1
     end
-    if trp_counter[2] > 26 then
-      trp_counter[2] = 1
-      trp_counter[1] = trp_counter[1] + 1
+    if global.trp_counter[2] > 26 then
+      global.trp_counter[2] = 1
+      global.trp_counter[1] = global.trp_counter[1] + 1
     end
-    if trp_counter[1] > 26 then
-      trp_counter[1] = 1
+    if global.trp_counter[1] > 26 then
+      global.trp_counter[1] = 1
     end
 
     -- New key.
-    key = ALPHA[trp_counter[1]]..ALPHA[trp_counter[2]]..tostring(trp_counter[3])
-  until trp[key] == nil
+    key = ALPHA[global.trp_counter[1]]..ALPHA[global.trp_counter[2]]..tostring(global.trp_counter[3])
+  until global.trp[key] == nil
   return key
+end
+
+-- Post: Sends message to the player calling the fire mission.
+function MessageToObserver(player_index, fdc_name, gun_count, round_type, round_count, trp_key)
+  local player = game.players[player_index]
+  player.print("Message to observer:")
+  player.print(fdc_name..", "..gun_count.." guns, "..round_type.." in effect, "
+               ..round_count.." rounds, target number "..trp_key..".")
+  -- Implement later:
+  -- player.print() time in flight
 end
 
 -- Post: Removes the selected TRPs.
@@ -212,7 +250,7 @@ function OnFireButton(player_index)
       table.insert(fire_mission_queue, v)
     end
   end
-  ExecuteFireMissions(player_index)
+  ExecuteFireMissions(player_index, "mortar-60")
   ShowTrpController(player_index)
 end
 
@@ -221,7 +259,7 @@ end
 --       are appended to fdc.
 function OnFdcPlaced(event)
   local new_fdc_name = GenerateFdcName()
-  table.insert(fdc, {new_fdc_name, event.created_entity})
+  table.insert(global.fdc, {new_fdc_name, event.created_entity})
   if event.player_index ~= nil then
     game.players[event.player_index].print("New FDC "..new_fdc_name)
   --[[
@@ -236,9 +274,9 @@ end
 -- Post: FDC is removed from fdc.
 function OnFdcDestroyed(event)
   local entity = event.entity
-  for k,v in pairs(fdc) do
+  for k,v in pairs(global.fdc) do
     if v[2] == entity then
-      table.remove(fdc, k)
+      table.remove(global.fdc, k)
     end
   end
 end

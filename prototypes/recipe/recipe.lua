@@ -16,6 +16,32 @@ data:extend(
   },
   {
     type = "recipe",
+    name = "mortar-60",
+    enabled = false,
+    energy_required = 10,
+    ingredients =
+    {
+      {"steel-plate", 5},
+      {"iron-plate", 5},
+      {"iron-gear-wheel", 2}
+    },
+    result = "mortar-60"
+  },
+  {
+    type = "recipe",
+    name = "mortar-60-he",
+    enabled = false,
+    energy_required = 10,
+    ingredients =
+    {
+      {"steel-plate", 2},
+      {"plastic-bar", 2},
+      {"explosives", 2}
+    },
+    result = "mortar-60-he"
+  },
+  {
+    type = "recipe",
     name = "fo-gun",
     enabled = false,
     energy_required = 5,
