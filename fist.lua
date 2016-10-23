@@ -54,7 +54,7 @@ function EvaluateNewTargets(player_index, pos)
 end
 
 -- Pre:  Called when there at least one fire mission queued.
--- Post: Determines which FDC will handle the 
+-- Post: Determines which FDC will handle the fire mission and executes it.
 function ExecuteFireMissions(player_index, gun_type)
   local player = game.players[player_index]
   while #fire_mission_queue > 0 do
@@ -81,13 +81,11 @@ function ExecuteFireMissions(player_index, gun_type)
       -- If there is an FDC in range of the TRP, give the current mission to the
       -- nearest one for firing.
       if nearest_fdc ~= nil then
-        -- Fire here.
         local guns = GetFdcGuns(nearest_pos, gun_type)
-        local round_type = "HE"
-        local round_count = 3
+        local round_type = "HE"  -- determine from ammo available and/or selected
+        local round_count = 3    -- determine from ammo available and/or selected
         MessageToObserver(player_index, nearest_fdc, #guns, round_type, round_count, v)
-        -- player.print("FDC "..nearest_fdc.." fires "..v)
-        -- Game.print_all("Found "..#guns.." "..gun_type.." near "..nearest_fdc)
+        -- Fire here.
       else
         player.print("No FDC within range of "..v"!")
       end
@@ -250,7 +248,9 @@ function OnFireButton(player_index)
       table.insert(fire_mission_queue, v)
     end
   end
-  ExecuteFireMissions(player_index, "mortar-60")
+  if #fire_mission_queue > 0 then
+    ExecuteFireMissions(player_index, "mortar-60")
+  end
   ShowTrpController(player_index)
 end
 
@@ -260,14 +260,14 @@ end
 function OnFdcPlaced(event)
   local new_fdc_name = GenerateFdcName()
   table.insert(global.fdc, {new_fdc_name, event.created_entity})
+  --[[
   if event.player_index ~= nil then
     game.players[event.player_index].print("New FDC "..new_fdc_name)
-  --[[
   -- Check to see how to get force that robot is on.
   elseif event.robot ~= nil then
     Game.print_force(event.robot.force).print("New FDC "..new_fdc_name)
-  --]]
   end
+  --]]
 end
 
 -- Pre:  Called when an FDC is destroyed.

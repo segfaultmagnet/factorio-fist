@@ -35,7 +35,6 @@ PHONETIC = {"Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel",
            "Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey",
            "X-ray","Yankee","Zulu"}
 MAX_TRP = 8
-
 MAX_RANGE = {}
 MAX_RANGE["mortar-60"] = 50
 FDC_CONTROL_RADIUS = 3
