@@ -278,7 +278,6 @@ function OnFdcDestroyed(event)
       break
     end
   end
-  Game.print_all("FDC destroyed!")
 end
 
 -- Pre:  Called when an FDC is mined by a player.
@@ -289,7 +288,6 @@ function OnFdcMined(event)
       table.remove(global.fdc, k)
     end
   end
-  Game.print_all("FDC mined!")
 end
 
 -- Pre:  Called when a gun is placed, either by player or robot.
@@ -373,10 +371,16 @@ function SpawnProjectile(gun_type, round_type, round_count, gun_pos, tgt_pos)
 
     game.surfaces["nauvis"].create_entity({
       name = round_type,
-      amount = round_count,
+      amount = 1,
       position = gun_pos,
       target = new_tgt,
       speed = MUZZLE_VELOCITY[gun_type]
+    })
+    game.surfaces["nauvis"].create_entity({
+      name = "gunshot-mortar",
+      amount = 1,
+      position = gun_pos,
+      target = new_tgt
     })
   end
 end

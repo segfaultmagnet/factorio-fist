@@ -4,9 +4,15 @@ Factorio mod which adds indirect fire support.
 
 ## To-Do
 
-Fix mortar-60-he projectile.
+Clean up GUI:
 
-Add explosion-gunshot entities at origin of gunshot.
+  Make smaller replacement GUI on close so that fo-gun doesn't need to be fired
+
+    in order to bring up controller.
+
+  Add round type selection.
+
+  Add round count selection.
 
 Implement inventory for FDC and mortars.
 

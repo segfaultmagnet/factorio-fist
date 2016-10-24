@@ -11,7 +11,7 @@ GUI elements for FIST mod.
 
 -- CLoses the controller.
 function ExitFistController(player_index)
-  local trp_ctrl = game.players[player_index].gui.center.trp_ctrl
+  local trp_ctrl = game.players[player_index].gui.left.trp_ctrl
   if trp_ctrl ~= nil and trp_ctrl.valid then
     trp_ctrl.destroy()
   end
@@ -20,7 +20,7 @@ end
 -- Pre:  player_index is a valid index to the player getting this popup.
 -- Post: Returns the FIST Controller frame.
 function GuiTrpController(player_index)
-  local player_gui = game.players[player_index].gui.center
+  local player_gui = game.players[player_index].gui.left
 
   -- Reset the list element if it already exists and start fresh.
   if player_gui.trp_ctrl ~= nil
@@ -135,7 +135,7 @@ end
 
 -- Post: Removes the selected TRPs.
 function OnDeleteButton(player_index)
-  local list = game.players[player_index].gui.center.trp_ctrl.left_flow.list
+  local list = game.players[player_index].gui.left.trp_ctrl.left_flow.list
   for k,v in pairs(list.children_names) do
     if list[v].checkbox.state == true then
       RemoveTargetReference(player_index, v)
@@ -151,7 +151,7 @@ function OnFireButton(player_index)
   local round_type = TESTING_ROUND_TYPE
   local round_count = TESTING_ROUND_COUNT
 
-  local list = game.players[player_index].gui.center.trp_ctrl.left_flow.list
+  local list = game.players[player_index].gui.left.trp_ctrl.left_flow.list
   for k,v in pairs(list.children_names) do
     if list[v].checkbox.state == true then
       table.insert(fire_mission_queue, v)

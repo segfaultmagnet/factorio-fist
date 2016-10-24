@@ -65,7 +65,7 @@ data:extend(
           source_effects =
           {
             type = "create-explosion",
-            entity_name = "explosion-gunshot"
+            entity_name = "gunshot-mortar"
           }
         }
       }
@@ -98,7 +98,7 @@ data:extend(
           source_effects =
           {
             type = "create-explosion",
-            entity_name = "explosion-gunshot"
+            entity_name = "gunshot-mortar"
           }
         }
       }
