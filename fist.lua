@@ -117,29 +117,6 @@ function GetFdcConnectedGuns(fdc, gun_type)
   return guns
 end
 
--- Pre:  Note: deprecated. Use GetFdcConnectedGuns instead.
---       fdc is the FDC.
---       gun_type is the name of the guns to be searched for (e.g. "mortar-81").
--- Post: Returns a table of all guns within the FDC's control radius.
-function GetFdcGunsRadius(fdc, gun_type)
-  local fdc_pos = fdc.position
-  local guns = {}
-  local bound =
-  {
-    left_top = { fdc_pos.x - FDC_CONTROL_RADIUS, fdc_pos.y - FDC_CONTROL_RADIUS },
-    right_bottom = { fdc_pos.x + FDC_CONTROL_RADIUS, fdc_pos.y + FDC_CONTROL_RADIUS }
-  }
-  local nearby = game.surfaces["nauvis"].find_entities_filtered{area = bound, name = gun_type}
-  local i = 0
-  for k,v in pairs(nearby) do
-    i = i + 1
-    if Position.distance(fdc_pos, v.position) < FDC_CONTROL_RADIUS then
-      table.insert(guns, v)
-    end
-  end
-  return guns
-end
-
 -- Post: Checks to see if the player has fo-gun in their gun inventory or if
 --       they do not have a blank round. If so, calls SetBlanks to set count of
 --       blanks in ammo inventory to one.
@@ -202,23 +179,9 @@ end
 function GenerateFdcName()
   local key
   repeat
---[[
-    -- Increment identifier.
-    global.fdc_counter[2] = global.fdc_counter[2] + 1
-    if global.fdc_counter[2] > 26 then
-      global.fdc_counter[2] = 1
-      global.fdc_counter[1] = global.fdc_counter[1] + 1
-    end
-    if global.fdc_counter[1] > 26 then
-      global.fdc_counter[1] = 1
-    end
---]]
-    -- key = PHONETIC[global.fdc_counter[1]].." "..PHONETIC[global.fdc_counter[2]]
-
     key = HOLLYWOOD[math.ceil(#HOLLYWOOD * math.random())].." "
           ..math.ceil(9 * math.random()).."-"
           ..math.ceil(9 * math.random())
-
   until global.fdc[tostring(key)] == nil
   return key
 end
@@ -262,14 +225,6 @@ end
 function OnFdcPlaced(event)
   local new_fdc_name = GenerateFdcName()
   table.insert(global.fdc, {new_fdc_name, event.created_entity})
-  --[[
-  if event.player_index ~= nil then
-    game.players[event.player_index].print("New FDC "..new_fdc_name)
-  -- Check to see how to get force that robot is on.
-  elseif event.robot ~= nil then
-    Game.print_force(event.robot.force).print("New FDC "..new_fdc_name)
-  end
-  --]]
 end
 
 -- Pre:  Called when an FDC is destroyed.
