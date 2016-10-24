@@ -71,8 +71,8 @@ function ExecuteFireMissions(player_index, gun_type, round_type, round_count)
         for _,w in pairs(global.fdc) do
           local gun_count = #GetFdcConnectedGuns(w[2], gun_type)
           local this_range = Position.distance(w[2].position, global.trp[v])
-          if this_range <= MAX_RANGE[gun_type] and gun_count > 0
-            and (nearest_range == nil or this_range < nearest_range) then
+          if this_range <= MAX_RANGE[gun_type] and this_range >= MINIMUM_SAFE_DISTANCE
+            and gun_count > 0 and (nearest_range == nil or this_range < nearest_range) then
             nearest_fdc_key = w[1]
             nearest_fdc_entity = w[2]
             nearest_range = this_range
@@ -83,10 +83,10 @@ function ExecuteFireMissions(player_index, gun_type, round_type, round_count)
         -- nearest one for firing.
         if nearest_fdc_key ~= nil then
           local guns = GetFdcConnectedGuns(nearest_fdc_entity, gun_type)
-          MessageToObserver(player_index, nearest_fdc_key, #guns, string.upper(round_type), round_count, v)
+          MessageToObserver(player_index, nearest_fdc_key, string.upper(round_type), round_count, v)
 
           for _,g in pairs(guns) do
-            SpawnIndirect(gun_type, round_type, round_count, g.position, global.trp[v])
+            SpawnIndirect(gun_type, round_type, round_count, nearest_fdc_entity.position, g.position, global.trp[v])
           end
         else
           player.print("No FDC within range of "..v.."!")
@@ -202,6 +202,7 @@ end
 function GenerateFdcName()
   local key
   repeat
+--[[
     -- Increment identifier.
     global.fdc_counter[2] = global.fdc_counter[2] + 1
     if global.fdc_counter[2] > 26 then
@@ -211,10 +212,14 @@ function GenerateFdcName()
     if global.fdc_counter[1] > 26 then
       global.fdc_counter[1] = 1
     end
+--]]
+    -- key = PHONETIC[global.fdc_counter[1]].." "..PHONETIC[global.fdc_counter[2]]
 
-    -- New key.
-    key = PHONETIC[global.fdc_counter[1]].." "..PHONETIC[global.fdc_counter[2]]
-  until global.fdc[key] == nil
+    key = HOLLYWOOD[math.ceil(#HOLLYWOOD * math.random())].." "
+          ..math.ceil(9 * math.random()).."-"
+          ..math.ceil(9 * math.random())
+
+  until global.fdc[tostring(key)] == nil
   return key
 end
 
@@ -238,17 +243,17 @@ function GenerateTargetReference()
 
     -- New key.
     key = ALPHA[global.trp_counter[1]]..ALPHA[global.trp_counter[2]]..tostring(global.trp_counter[3])
-  until global.trp[key] == nil
+  until global.trp[tostring(key)] == nil
   return key
 end
 
 -- Post: Sends message to the player calling the fire mission.
 function MessageToObserver(player_index, fdc_name, round_type, round_count, trp_key)
   local player = game.players[player_index]
-  player.print(fdc_name..", "
-               ..round_type.." in effect, "
-               ..round_count.." rounds, target "
-               ..trp_key..".")
+  player.print(tostring(fdc_name)..", "
+               ..tostring(round_type).." in effect, "
+               ..tostring(round_count).." rounds, target "
+               ..tostring(trp_key)..".")
 end
 
 -- Pre:  Called when an FDC is placed, either by player or robot.
@@ -358,14 +363,14 @@ function SetBlanks(player_index, count)
 end
 
 -- Post: Spawns new projectiles of round type, moving from gun_pos to tgt_pos.
-function SpawnIndirect(gun_type, round_type, round_count, gun_pos, tgt_pos)
+function SpawnIndirect(gun_type, round_type, round_count, fdc_pos, gun_pos, tgt_pos)
   -- Need to randomize impact position.
   for i = 1, round_count do
     local dist = Position.distance(gun_pos, tgt_pos)
     local new_tgt = 
     {
-    tgt_pos.x + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5)),
-    tgt_pos.y + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5))
+    tgt_pos.x + (gun_pos.x - fdc_pos.x) + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5)),
+    tgt_pos.y + (gun_pos.y - fdc_pos.y) + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5))
     }
 
     game.surfaces["nauvis"].create_entity({

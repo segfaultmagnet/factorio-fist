@@ -6,14 +6,13 @@ Includes Factorio-Stdlib (https://github.com/Afforess/Factorio-Stdlib).
 
 ## To-Do
 
-#### Clean up GUI:
+Add round type selection.
 
-  Make smaller replacement GUI on close so that fo-gun doesn't need to be fired in order to bring up controller.
+Make smaller replacement GUI on close so that fo-gun doesn't need to be fired
+in order to bring up controller.
 
-  Add round type selection.
+Implement inventory for FDC and mortars.
 
-  Add round count selection.
+Create queue with delays for projectile spawning.
 
-#### Implement inventory for FDC and mortars.
-
-#### Time in flight?
+Add round count selection.

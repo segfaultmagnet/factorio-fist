@@ -6,7 +6,7 @@ data:extend(
     flags = {"not-on-map"},
     acceleration = 0.005,
     speed = 0.1,
-    piercing_damage = 40,
+    piercing_damage = 50,
     action =
     {
       type = "direct",
@@ -58,7 +58,7 @@ data:extend(
                     damage =
                     {
                       type = "explosion",
-                      amount = 50
+                      amount = 80
                     }
                   }
                 }
@@ -116,7 +116,7 @@ data:extend(
                     damage =
                     {
                       type = "explosion",
-                      amount = 40
+                      amount = 50
                     },
                     {
                       type = "create-entity",

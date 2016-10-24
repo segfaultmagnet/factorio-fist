@@ -12,13 +12,16 @@ calls seen here.
 ----------------------------------------
 To-Do:
 
-Clean up GUI:
-  Make smaller replacement GUI on close so that fo-gun doesn't need to be fired
-    in order to bring up controller.
-  Add round type selection.
-  Add round count selection.
+Add round type selection.
+
+Make smaller replacement GUI on close so that fo-gun doesn't need to be fired
+in order to bring up controller.
 
 Implement inventory for FDC and mortars.
+
+Create queue with delays for projectile spawning.
+
+Add round count selection.
 ----------------------------------------
 --]]
 
@@ -33,7 +36,6 @@ require("gui")
 
 -- Table of Fire Direction Centers and counters for naming.
 global.fdc = {}
-global.fdc_counter = {1, 0}
 
 -- Table of Target Reference Points and counters for naming.
 global.trp = {}
@@ -137,6 +139,7 @@ if DEBUG == true then
           player.get_inventory(i).clear()
         end
       end
+      player.character.destructible = false
       player.character.insert({name="steel-axe",count=3})
       player.character.insert({name="fo-gun",count=1})
       player.character.insert({name="grenade",count=20})

@@ -21,11 +21,15 @@ PHONETIC = {"Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel",
            "India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa",
            "Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey",
            "X-ray","Yankee","Zulu"}
+HOLLYWOOD = {"Hangman", "Lightning", "Rain", "Slinger", "Steel", "Storm",
+             "Thunder", "Twisted"}
+
+MINIMUM_SAFE_DISTANCE = 40
 
 MAX_TRP = 8
 
 MAX_RANGE = {}
-MAX_RANGE["mortar-81"] = 180
+MAX_RANGE["mortar-81"] = 300
 
 MUZZLE_VELOCITY = {}
 MUZZLE_VELOCITY["mortar-81"] = 0.1

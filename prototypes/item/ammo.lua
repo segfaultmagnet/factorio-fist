@@ -58,7 +58,7 @@ data:extend(
         {
           type = "projectile",
           projectile = "mortar-81-he",
-          starting_speed = 0.5,
+          starting_speed = 0.1,
           direction_deviation = 0.5,
           range_deviation = 0.5,
           max_range = 180,
