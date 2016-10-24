@@ -16,7 +16,7 @@ data:extend(
   },
   {
     type = "recipe",
-    name = "mortar-60",
+    name = "mortar-81",
     enabled = false,
     energy_required = 10,
     ingredients =
@@ -25,20 +25,21 @@ data:extend(
       {"iron-plate", 5},
       {"iron-gear-wheel", 2}
     },
-    result = "mortar-60"
+    result = "mortar-81"
   },
   {
     type = "recipe",
-    name = "mortar-60-he",
+    name = "mortar-81-he",
     enabled = false,
     energy_required = 10,
     ingredients =
     {
       {"steel-plate", 2},
       {"plastic-bar", 2},
-      {"explosives", 2}
+      {"explosives", 2},
+      {"iron-plate", 1}
     },
-    result = "mortar-60-he"
+    result = "mortar-81-he"
   },
   {
     type = "recipe",

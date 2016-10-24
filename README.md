@@ -2,6 +2,8 @@
 
 Factorio mod which adds indirect fire support.
 
+Includes Factorio-Stdlib (https://github.com/Afforess/Factorio-Stdlib).
+
 ## To-Do
 
 #### Clean up GUI:
@@ -13,7 +15,5 @@ Factorio mod which adds indirect fire support.
   Add round count selection.
 
 #### Implement inventory for FDC and mortars.
-
-#### Maybe change 60mm to 81mm?
 
 #### Time in flight?

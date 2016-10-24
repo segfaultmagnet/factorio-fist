@@ -83,10 +83,10 @@ function ExecuteFireMissions(player_index, gun_type, round_type, round_count)
         -- nearest one for firing.
         if nearest_fdc_key ~= nil then
           local guns = GetFdcConnectedGuns(nearest_fdc_entity, gun_type)
-          MessageToObserver(player_index, nearest_fdc_key, #guns, round_type, round_count, v)
+          MessageToObserver(player_index, nearest_fdc_key, #guns, string.upper(round_type), round_count, v)
 
           for _,g in pairs(guns) do
-            SpawnProjectile(gun_type, round_type, round_count, g.position, global.trp[v])
+            SpawnIndirect(gun_type, round_type, round_count, g.position, global.trp[v])
           end
         else
           player.print("No FDC within range of "..v.."!")
@@ -101,7 +101,7 @@ function ExecuteFireMissions(player_index, gun_type, round_type, round_count)
 end
 
 -- Pre:  fdc is the FDC.
---       gun_type is the name of the guns to be searched for (e.g. "mortar-60").
+--       gun_type is the name of the guns to be searched for (e.g. "mortar-81").
 -- Post: Returns a table of all guns within the FDC's circuit network.
 function GetFdcConnectedGuns(fdc, gun_type)
   local connected = fdc.circuit_connected_entities
@@ -119,7 +119,7 @@ end
 
 -- Pre:  Note: deprecated. Use GetFdcConnectedGuns instead.
 --       fdc is the FDC.
---       gun_type is the name of the guns to be searched for (e.g. "mortar-60").
+--       gun_type is the name of the guns to be searched for (e.g. "mortar-81").
 -- Post: Returns a table of all guns within the FDC's control radius.
 function GetFdcGunsRadius(fdc, gun_type)
   local fdc_pos = fdc.position
@@ -243,13 +243,12 @@ function GenerateTargetReference()
 end
 
 -- Post: Sends message to the player calling the fire mission.
-function MessageToObserver(player_index, fdc_name, gun_count, round_type, round_count, trp_key)
+function MessageToObserver(player_index, fdc_name, round_type, round_count, trp_key)
   local player = game.players[player_index]
-  player.print("Message to observer:")
-  player.print(fdc_name..", "..gun_count.." guns, "..round_type.." in effect, "
-               ..round_count.." rounds, target number "..trp_key..".")
-  -- Implement later:
-  -- player.print() time in flight
+  player.print(fdc_name..", "
+               ..round_type.." in effect, "
+               ..round_count.." rounds, target "
+               ..trp_key..".")
 end
 
 -- Pre:  Called when an FDC is placed, either by player or robot.
@@ -359,18 +358,18 @@ function SetBlanks(player_index, count)
 end
 
 -- Post: Spawns new projectiles of round type, moving from gun_pos to tgt_pos.
-function SpawnProjectile(gun_type, round_type, round_count, gun_pos, tgt_pos)
+function SpawnIndirect(gun_type, round_type, round_count, gun_pos, tgt_pos)
   -- Need to randomize impact position.
   for i = 1, round_count do
     local dist = Position.distance(gun_pos, tgt_pos)
     local new_tgt = 
     {
-    tgt_pos.x + (dist * ROUND_DISPERSION_FACTOR * (math.random() - 0.5)),
-    tgt_pos.y + (dist * ROUND_DISPERSION_FACTOR * (math.random() - 0.5))
+    tgt_pos.x + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5)),
+    tgt_pos.y + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5))
     }
 
     game.surfaces["nauvis"].create_entity({
-      name = round_type,
+      name = gun_type.."-"..string.lower(round_type),
       amount = 1,
       position = gun_pos,
       target = new_tgt,

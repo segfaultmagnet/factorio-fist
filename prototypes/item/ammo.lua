@@ -6,7 +6,7 @@ data:extend(
   },
   {
     type = "ammo-category",
-    name = "mortar-60"
+    name = "mortar-81"
   },
   {
     type = "ammo",
@@ -40,15 +40,15 @@ data:extend(
   },
   {
     type = "ammo",
-    name = "mortar-60-he",
-    icon = "__FIST__/graphics/icons/mortar-60-he.png",
+    name = "mortar-81-he",
+    icon = "__FIST__/graphics/icons/mortar-81-he.png",
     flags = {"goes-to-main-inventory"},
     subgroup = "ammo",
-    order = "d[mortar-60]-a[he]",
+    order = "d[mortar-81]-a[he]",
     stack_size = 100,
     ammo_type =
     {
-      category = "mortar-60",
+      category = "mortar-81",
       clamp_position = true,
       target_type = "position",
       action =
@@ -57,44 +57,11 @@ data:extend(
         action_delivery =
         {
           type = "projectile",
-          projectile = "mortar-60-he",
+          projectile = "mortar-81-he",
           starting_speed = 0.5,
           direction_deviation = 0.5,
           range_deviation = 0.5,
-          max_range = 80,
-          source_effects =
-          {
-            type = "create-explosion",
-            entity_name = "gunshot-mortar"
-          }
-        }
-      }
-    }
-  },
-  {
-    type = "ammo",
-    name = "mortar-60-vt",
-    icon = "__FIST__/graphics/icons/mortar-60-vt.png",
-    flags = {"goes-to-main-inventory"},
-    subgroup = "ammo",
-    order = "d[mortar-60]-a[he]",
-    stack_size = 100,
-    ammo_type =
-    {
-      category = "mortar-60",
-      clamp_position = true,
-      target_type = "position",
-      action =
-      {
-        type = "direct",
-        action_delivery =
-        {
-          type = "projectile",
-          projectile = "mortar-60-vt",
-          starting_speed = 0.5,
-          direction_deviation = 0.5,
-          range_deviation = 0.5,
-          max_range = 80,
+          max_range = 180,
           source_effects =
           {
             type = "create-explosion",

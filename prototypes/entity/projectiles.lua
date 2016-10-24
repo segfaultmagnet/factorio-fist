@@ -2,11 +2,11 @@ data:extend(
 {
   {
     type = "projectile",
-    name = "mortar-60-he",
+    name = "mortar-81-he",
     flags = {"not-on-map"},
     acceleration = 0.005,
     speed = 0.1,
-    piercing_damage = 15,
+    piercing_damage = 40,
     action =
     {
       type = "direct",
@@ -35,7 +35,7 @@ data:extend(
                     damage =
                     {
                       type = "physical",
-                      amount = 10
+                      amount = 30
                     }
                   }
                 }
@@ -58,7 +58,7 @@ data:extend(
                     damage =
                     {
                       type = "explosion",
-                      amount = 30
+                      amount = 50
                     }
                   }
                 }
@@ -82,7 +82,7 @@ data:extend(
   },
   {
     type = "projectile",
-    name = "mortar-60-vt",
+    name = "mortar-81-vt",
     flags = {"not-on-map"},
     acceleration = 0.005,
     speed = 0.1,
@@ -116,7 +116,7 @@ data:extend(
                     damage =
                     {
                       type = "explosion",
-                      amount = 20
+                      amount = 40
                     },
                     {
                       type = "create-entity",

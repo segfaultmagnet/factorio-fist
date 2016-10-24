@@ -60,8 +60,8 @@ data:extend(
   },
   {
     type = "logistic-container",
-    name = "mortar-60",
-    icon = "__FIST__/graphics/icons/mortar-60.png",
+    name = "mortar-81",
+    icon = "__FIST__/graphics/icons/mortar-81.png",
     flags = {"placeable-player", "player-creation"},
     collision_box = {{-0.7, -0.7}, {0.7, 0.7}},
     selection_box = {{-1, -1}, {1, 1}},
@@ -70,18 +70,18 @@ data:extend(
     inventory_size = 1,
     logistic_mode = "requester",
     max_health = 150,
-    minable = {mining_time = 0.5, result = "mortar-60"},
+    minable = {mining_time = 0.5, result = "mortar-81"},
     circuit_wire_connection_point =
     {
       shadow =
       {
         red = {0, 0},
-        -- green = {0.609375, 0.515625},
+        green = {0.2, 0.1},
       },
       wire =
       {
         red = {0, 0},
-        -- green = {0.40625, 0.375},
+        green = {0.2, 0.1},
       }
     },
     circuit_wire_max_distance = 3,
@@ -100,7 +100,7 @@ data:extend(
     },
     picture =
     {
-      filename = "__FIST__/graphics/entity/mortar-60.png",
+      filename = "__FIST__/graphics/entity/mortar-81.png",
       priority = "high",
       width = 60,
       height = 60

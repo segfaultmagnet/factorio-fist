@@ -12,12 +12,12 @@ data:extend(
   },
   {
     type = "item",
-    name = "mortar-60",
-    icon = "__FIST__/graphics/icons/mortar-60.png",
+    name = "mortar-81",
+    icon = "__FIST__/graphics/icons/mortar-81.png",
     flags = {"goes-to-quickbar"},
     subgroup = "defensive-structure",
-    order = "b[turret]-a[mortar-60]",
-    place_result = "mortar-60",
+    order = "b[turret]-a[mortar-81]",
+    place_result = "mortar-81",
     stack_size = 50
   }
 }

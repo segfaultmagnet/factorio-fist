@@ -19,10 +19,6 @@ Clean up GUI:
   Add round count selection.
 
 Implement inventory for FDC and mortars.
-
-Maybe change 60mm to 81mm?
-
-Time in flight?
 ----------------------------------------
 --]]
 
@@ -67,7 +63,7 @@ end)
 Event.register(defines.events.on_built_entity, function(event)
   if event.created_entity.name == "fdc" then
     OnFdcPlaced(event)
-  elseif event.created_entity.name == "mortar-60" then
+  elseif event.created_entity.name == "mortar-81" then
     OnGunPlaced(event)
   end
 end)
@@ -76,7 +72,7 @@ end)
 Event.register(defines.events.on_robot_built_entity, function(event)
   if event.entity.name == "fdc" then
     OnFdcPlaced(event)
-  elseif event.created_entity.name == "mortar-60" then
+  elseif event.created_entity.name == "mortar-81" then
     OnGunPlaced(event)
   end
 end)
@@ -146,9 +142,8 @@ if DEBUG == true then
       player.character.insert({name="grenade",count=20})
       player.character.insert({name="red-wire",count=30})
       player.character.insert({name="fdc",count=5})
-      player.character.insert({name="mortar-60",count=20})
-      player.character.insert({name="mortar-60-he",count=30})
-      player.character.insert({name="mortar-60-vt",count=30})
+      player.character.insert({name="mortar-81",count=20})
+      player.character.insert({name="mortar-81-he",count=30})
     end
   end)
 end

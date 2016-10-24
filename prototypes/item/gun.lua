@@ -16,7 +16,7 @@ data:extend(
       damage_modifier = 0,
       movement_slow_down_factor = 0,
       projectile_creation_distance = 1,
-      range = 50
+      range = 60
     }
   }
 }

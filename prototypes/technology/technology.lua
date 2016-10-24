@@ -12,11 +12,11 @@ data:extend(
       },
       {
         type = "unlock-recipe",
-        recipe = "mortar-60"
+        recipe = "mortar-81"
       },
       {
         type = "unlock-recipe",
-        recipe = "mortar-60-he"
+        recipe = "mortar-81-he"
       },
       {
         type = "unlock-recipe",
