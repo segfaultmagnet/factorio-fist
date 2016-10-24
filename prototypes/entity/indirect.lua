@@ -13,6 +13,20 @@ data:extend(
     logistic_mode = "storage",
     max_health = 200,
     minable = {mining_time = 0.5, result = "fdc"},
+    circuit_wire_connection_point =
+    {
+      shadow =
+      {
+        red = {0, 0},
+        green = {0.2, 0.1},
+      },
+      wire =
+      {
+        red = {0, 0},
+        green = {0.2, 0.1},
+      }
+    },
+    circuit_wire_max_distance = 3,
     resistances =
     {
       {
@@ -45,7 +59,7 @@ data:extend(
     }
   },
   {
-    type = "container",
+    type = "logistic-container",
     name = "mortar-60",
     icon = "__FIST__/graphics/icons/mortar-60.png",
     flags = {"placeable-player", "player-creation"},
@@ -54,8 +68,23 @@ data:extend(
     corpse = "small-remnants",
     dying_explosion = "medium-explosion",
     inventory_size = 1,
+    logistic_mode = "requester",
     max_health = 150,
     minable = {mining_time = 0.5, result = "mortar-60"},
+    circuit_wire_connection_point =
+    {
+      shadow =
+      {
+        red = {0, 0},
+        -- green = {0.609375, 0.515625},
+      },
+      wire =
+      {
+        red = {0, 0},
+        -- green = {0.40625, 0.375},
+      }
+    },
+    circuit_wire_max_distance = 3,
     resistances =
     {
       {

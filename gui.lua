@@ -2,7 +2,7 @@
 Name:         gui.lua
 Authors:      Matthew Sheridan
 Date:         21 October 2016
-Revision:     23 October 2016
+Revision:     24 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 
@@ -15,11 +15,6 @@ function ExitFistController(player_index)
   if trp_ctrl ~= nil and trp_ctrl.valid then
     trp_ctrl.destroy()
   end
-end
-
--- Displays the controller.
-function ShowTrpController(player_index)
-  local trp_ctrl = GuiTrpController(player_index)
 end
 
 -- Pre:  player_index is a valid index to the player getting this popup.
@@ -136,4 +131,40 @@ function GuiTrpController(player_index)
     }
   end
   return player_gui.trp_ctrl
+end
+
+-- Post: Removes the selected TRPs.
+function OnDeleteButton(player_index)
+  local list = game.players[player_index].gui.center.trp_ctrl.left_flow.list
+  for k,v in pairs(list.children_names) do
+    if list[v].checkbox.state == true then
+      RemoveTargetReference(player_index, v)
+    end
+  end
+  ShowTrpController(player_index)
+end
+
+-- Pre:  player_index is the player calling fire.
+-- Post: Executes fire mission against currently selected TRP.
+function OnFireButton(player_index)
+  local gun_type = TESTING_GUN_TYPE
+  local round_type = TESTING_ROUND_TYPE
+  local round_count = TESTING_ROUND_COUNT
+
+  local list = game.players[player_index].gui.center.trp_ctrl.left_flow.list
+  for k,v in pairs(list.children_names) do
+    if list[v].checkbox.state == true then
+      table.insert(fire_mission_queue, v)
+    end
+  end
+  if #fire_mission_queue > 0 then
+    ExecuteFireMissions(player_index, gun_type, round_type, round_count)
+  end
+
+  ShowTrpController(player_index)
+end
+
+-- Displays the controller.
+function ShowTrpController(player_index)
+  local trp_ctrl = GuiTrpController(player_index)
 end

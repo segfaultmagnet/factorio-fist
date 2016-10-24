@@ -2,7 +2,7 @@
 Name:         fist.lua
 Authors:      Matthew Sheridan
 Date:         22 October 2016
-Revision:     23 October 2016
+Revision:     24 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 
@@ -55,39 +55,44 @@ end
 
 -- Pre:  Called when there at least one fire mission queued.
 -- Post: Determines which FDC will handle the fire mission and executes it.
-function ExecuteFireMissions(player_index, gun_type)
+function ExecuteFireMissions(player_index, gun_type, round_type, round_count)
   local player = game.players[player_index]
   while #fire_mission_queue > 0 do
 
     local i = 0
     for _,v in pairs(fire_mission_queue) do
-      local nearest_fdc = nil
-      local nearest_pos = nil
-      local ranges = {}
+      local nearest_fdc_key = nil
+      local nearest_fdc_entity = nil
+      local nearest_range = nil
       i = i + 1
 
       -- Determine distances to TRP from each FDC.
-      for _,w in pairs(global.fdc) do
-        new_range = Position.distance(w[2].position, global.trp[v])
-        if new_range <= MAX_RANGE[gun_type] then
-          table.insert(ranges, new_range)
+      if #global.fdc > 0 then
+        for _,w in pairs(global.fdc) do
+          local gun_count = #GetFdcConnectedGuns(w[2], gun_type)
+          local this_range = Position.distance(w[2].position, global.trp[v])
+          if this_range <= MAX_RANGE[gun_type] and gun_count > 0
+            and (nearest_range == nil or this_range < nearest_range) then
+            nearest_fdc_key = w[1]
+            nearest_fdc_entity = w[2]
+            nearest_range = this_range
+          end
         end
-        if new_range == table.min(ranges) then
-          nearest_fdc = w[1]
-          nearest_pos = w[2].position
-        end
-      end
 
-      -- If there is an FDC in range of the TRP, give the current mission to the
-      -- nearest one for firing.
-      if nearest_fdc ~= nil then
-        local guns = GetFdcGuns(nearest_pos, gun_type)
-        local round_type = "HE"  -- determine from ammo available and/or selected
-        local round_count = 3    -- determine from ammo available and/or selected
-        MessageToObserver(player_index, nearest_fdc, #guns, round_type, round_count, v)
-        -- Fire here.
+        -- If there is an FDC in range of the TRP, give the current mission to the
+        -- nearest one for firing.
+        if nearest_fdc_key ~= nil then
+          local guns = GetFdcConnectedGuns(nearest_fdc_entity, gun_type)
+          MessageToObserver(player_index, nearest_fdc_key, #guns, round_type, round_count, v)
+
+          for _,g in pairs(guns) do
+            SpawnProjectile(gun_type, round_type, round_count, g.position, global.trp[v])
+          end
+        else
+          player.print("No FDC within range of "..v.."!")
+        end
       else
-        player.print("No FDC within range of "..v"!")
+        player.print("No FDC available!")
       end
 
       table.remove(fire_mission_queue, i)
@@ -95,10 +100,29 @@ function ExecuteFireMissions(player_index, gun_type)
   end
 end
 
--- Pre:  fdc_pos is the position of that FDC.
+-- Pre:  fdc is the FDC.
+--       gun_type is the name of the guns to be searched for (e.g. "mortar-60").
+-- Post: Returns a table of all guns within the FDC's circuit network.
+function GetFdcConnectedGuns(fdc, gun_type)
+  local connected = fdc.circuit_connected_entities
+  local guns = {}
+  if connected ~= nil then
+    for _,v in pairs(connected["red"]) do
+      if v.name == gun_type then
+        table.insert(guns, v)
+      end
+    end
+  end
+
+  return guns
+end
+
+-- Pre:  Note: deprecated. Use GetFdcConnectedGuns instead.
+--       fdc is the FDC.
 --       gun_type is the name of the guns to be searched for (e.g. "mortar-60").
 -- Post: Returns a table of all guns within the FDC's control radius.
-function GetFdcGuns(fdc_pos, gun_type)
+function GetFdcGunsRadius(fdc, gun_type)
+  local fdc_pos = fdc.position
   local guns = {}
   local bound =
   {
@@ -228,32 +252,6 @@ function MessageToObserver(player_index, fdc_name, gun_count, round_type, round_
   -- player.print() time in flight
 end
 
--- Post: Removes the selected TRPs.
-function OnDeleteButton(player_index)
-  local list = game.players[player_index].gui.center.trp_ctrl.left_flow.list
-  for k,v in pairs(list.children_names) do
-    if list[v].checkbox.state == true then
-      RemoveTargetReference(player_index, v)
-    end
-  end
-  ShowTrpController(player_index)
-end
-
--- Pre:  player_index is the player calling fire.
--- Post: Executes fire mission against currently selected TRP.
-function OnFireButton(player_index)
-  local list = game.players[player_index].gui.center.trp_ctrl.left_flow.list
-  for k,v in pairs(list.children_names) do
-    if list[v].checkbox.state == true then
-      table.insert(fire_mission_queue, v)
-    end
-  end
-  if #fire_mission_queue > 0 then
-    ExecuteFireMissions(player_index, "mortar-60")
-  end
-  ShowTrpController(player_index)
-end
-
 -- Pre:  Called when an FDC is placed, either by player or robot.
 -- Post: New name for FDC is generated and a table of name and entity pointer
 --       are appended to fdc.
@@ -277,7 +275,50 @@ function OnFdcDestroyed(event)
   for k,v in pairs(global.fdc) do
     if v[2] == entity then
       table.remove(global.fdc, k)
+      break
     end
+  end
+  Game.print_all("FDC destroyed!")
+end
+
+-- Pre:  Called when an FDC is mined by a player.
+-- Post: FDC is removed from fdc.
+function OnFdcMined(event)
+  for k,v in pairs(global.fdc) do
+    if v[2] == nil or v[2].valid == false then
+      table.remove(global.fdc, k)
+    end
+  end
+  Game.print_all("FDC mined!")
+end
+
+-- Pre:  Called when a gun is placed, either by player or robot.
+-- Post: The gun is connected to the nearest FDC, if there is one.
+function OnGunPlaced(event)
+  local gun = event.created_entity
+  local nearest_fdc = nil
+  local nearest_dist = nil
+  local bound =
+  {
+    left_top = { gun.position.x - FDC_CONTROL_RADIUS, gun.position.y - FDC_CONTROL_RADIUS },
+    right_bottom = { gun.position.x + FDC_CONTROL_RADIUS, gun.position.y + FDC_CONTROL_RADIUS }
+  }
+
+  -- Determine nearest FDC to this gun.
+  local nearby = game.surfaces["nauvis"].find_entities_filtered{area = bound, name = "fdc"}
+  local i = 0
+  for k,v in pairs(nearby) do
+    i = i + 1
+    local dist = Position.distance(gun.position, v.position)
+    if dist < FDC_CONTROL_RADIUS and (nearest_dist == nil or dist < nearest_dist) then
+      nearest_fdc = v
+      nearest_dist = dist
+    end
+  end
+
+  -- Wire them together.
+  if nearest_fdc ~= nil then
+    nearest_fdc.connect_neighbour({wire = defines.wire_type.red, target_entity = gun})
   end
 end
 
@@ -316,5 +357,26 @@ function SetBlanks(player_index, count)
         stack.clear()
       end
     end
+  end
+end
+
+-- Post: Spawns new projectiles of round type, moving from gun_pos to tgt_pos.
+function SpawnProjectile(gun_type, round_type, round_count, gun_pos, tgt_pos)
+  -- Need to randomize impact position.
+  for i = 1, round_count do
+    local dist = Position.distance(gun_pos, tgt_pos)
+    local new_tgt = 
+    {
+    tgt_pos.x + (dist * ROUND_DISPERSION_FACTOR * (math.random() - 0.5)),
+    tgt_pos.y + (dist * ROUND_DISPERSION_FACTOR * (math.random() - 0.5))
+    }
+
+    game.surfaces["nauvis"].create_entity({
+      name = round_type,
+      amount = round_count,
+      position = gun_pos,
+      target = new_tgt,
+      speed = MUZZLE_VELOCITY[gun_type]
+    })
   end
 end

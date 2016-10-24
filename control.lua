@@ -2,7 +2,7 @@
 Name:         control.lua
 Authors:      Matthew Sheridan
 Date:         20 October 2016
-Revision:     23 October 2016
+Revision:     24 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 
@@ -12,8 +12,10 @@ calls seen here.
 ----------------------------------------
 To-Do:
 
-Expand fire mission functionality.
-Actually launch some projectiles.
+Fix mortar-60-he projectile.
+Add explosion-gunshot entities at origin of gunshot.
+Implement inventory for FDC and mortars.
+Maybe change 60mm to 81mm?
 Time in flight?
 ----------------------------------------
 --]]
@@ -23,21 +25,9 @@ require("stdlib.event.event")
 require("stdlib.gui.gui")
 require("stdlib.string")
 require("stdlib.table")
+require("config")
 require("fist")
 require("gui")
-
-DEBUG = true
-
-ALPHA = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q",
-         "R","S","T","U","V","W","X","Y","Z"}
-PHONETIC = {"Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel",
-           "India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa",
-           "Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey",
-           "X-ray","Yankee","Zulu"}
-MAX_TRP = 8
-MAX_RANGE = {}
-MAX_RANGE["mortar-60"] = 50
-FDC_CONTROL_RADIUS = 3
 
 -- Table of Fire Direction Centers and counters for naming.
 global.fdc = {}
@@ -67,17 +57,21 @@ Event.register(defines.events.on_tick, function(event)
   new_trp_pos = nil
 end)
 
--- Check for newly-built FDCs.
+-- Check for newly-built FDCs and guns.
 Event.register(defines.events.on_built_entity, function(event)
   if event.created_entity.name == "fdc" then
     OnFdcPlaced(event)
+  elseif event.created_entity.name == "mortar-60" then
+    OnGunPlaced(event)
   end
 end)
 
--- Check for newly-built FDCs.
+-- Check for newly-built FDCs and guns.
 Event.register(defines.events.on_robot_built_entity, function(event)
   if event.entity.name == "fdc" then
     OnFdcPlaced(event)
+  elseif event.created_entity.name == "mortar-60" then
+    OnGunPlaced(event)
   end
 end)
 
@@ -85,6 +79,13 @@ end)
 Event.register(defines.events.on_entity_died, function(event)
   if event.entity.name == "fdc" then
     OnFdcDestroyed(event)
+  end
+end)
+
+-- Check for mined FDCs.
+Event.register(defines.events.on_player_mined_item, function(event)
+  if event.item_stack.name == "fdc" then
+    OnFdcMined(event)
   end
 end)
 
@@ -134,12 +135,14 @@ if DEBUG == true then
           player.get_inventory(i).clear()
         end
       end
+      player.character.insert({name="steel-axe",count=3})
       player.character.insert({name="fo-gun",count=1})
+      player.character.insert({name="grenade",count=20})
+      player.character.insert({name="red-wire",count=30})
       player.character.insert({name="fdc",count=5})
       player.character.insert({name="mortar-60",count=20})
       player.character.insert({name="mortar-60-he",count=30})
-      player.character.insert({name="grenade",count=20})
-      player.character.insert({name="steel-axe",count=3})
+      player.character.insert({name="mortar-60-vt",count=30})
     end
   end)
 end
