@@ -12,7 +12,6 @@ Configuration data for FIST mod, notably projectile information.
 DEBUG = true
 
 TESTING_GUN_TYPE = "mortar-81"
-TESTING_ROUND_TYPE = "he"
 TESTING_ROUND_COUNT = 1
 
 ALPHA = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q",
@@ -36,6 +35,12 @@ MUZZLE_VELOCITY["mortar-81"] = 0.1
 
 FDC_CONTROL_RADIUS = 3
 
+FIRE_LOCKOUT = 60
+
 ROUND_DISPERSION_FACTOR = {}
-ROUND_DISPERSION_FACTOR["he"] = 0.06
-ROUND_DISPERSION_FACTOR["vt"] = 0.10
+ROUND_DISPERSION_FACTOR["HE"] = 0.05
+ROUND_DISPERSION_FACTOR["VT"] = 0.08
+
+ROUND_TYPES = {}
+ROUND_TYPES["HE"] = "High Explosive"
+ROUND_TYPES["VT"] = "High Explosive, Proximity Fuze (Air Burst)"

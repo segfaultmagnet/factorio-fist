@@ -50,7 +50,6 @@ end
 function EvaluateNewTargets(player_index, pos)
   local player = game.players[player_index]
   AddTargetReference(player_index, GenerateTargetReference(), pos)
-  ShowTrpController(player_index)
 end
 
 -- Pre:  Called when there at least one fire mission queued.
@@ -71,8 +70,10 @@ function ExecuteFireMissions(player_index, gun_type, round_type, round_count)
         for _,w in pairs(global.fdc) do
           local gun_count = #GetFdcConnectedGuns(w[2], gun_type)
           local this_range = Position.distance(w[2].position, global.trp[v])
-          if this_range <= MAX_RANGE[gun_type] and this_range >= MINIMUM_SAFE_DISTANCE
-            and gun_count > 0 and (nearest_range == nil or this_range < nearest_range) then
+          if this_range <= MAX_RANGE[gun_type]
+            and this_range >= MINIMUM_SAFE_DISTANCE
+            and gun_count > 0
+            and (nearest_range == nil or this_range < nearest_range) then
             nearest_fdc_key = w[1]
             nearest_fdc_entity = w[2]
             nearest_range = this_range
@@ -83,10 +84,12 @@ function ExecuteFireMissions(player_index, gun_type, round_type, round_count)
         -- nearest one for firing.
         if nearest_fdc_key ~= nil then
           local guns = GetFdcConnectedGuns(nearest_fdc_entity, gun_type)
-          MessageToObserver(player_index, nearest_fdc_key, string.upper(round_type), round_count, v)
+          MessageToObserver(player_index, nearest_fdc_key, #guns,
+                            string.upper(round_type), round_count, v)
 
           for _,g in pairs(guns) do
-            SpawnIndirect(gun_type, round_type, round_count, nearest_fdc_entity.position, g.position, global.trp[v])
+            SpawnIndirect(gun_type, round_type, round_count,
+                          nearest_fdc_entity.position, g.position, global.trp[v])
           end
         else
           player.print("No FDC within range of "..v.."!")
@@ -205,17 +208,23 @@ function GenerateTargetReference()
     end
 
     -- New key.
-    key = ALPHA[global.trp_counter[1]]..ALPHA[global.trp_counter[2]]..tostring(global.trp_counter[3])
+    key = ALPHA[global.trp_counter[1]]..ALPHA[global.trp_counter[2]]
+          ..tostring(global.trp_counter[3])
   until global.trp[tostring(key)] == nil
   return key
 end
 
 -- Post: Sends message to the player calling the fire mission.
-function MessageToObserver(player_index, fdc_name, round_type, round_count, trp_key)
+function MessageToObserver(player_index, fdc_name, gun_count, round_type, round_count, trp_key)
   local player = game.players[player_index]
+  local round_plural = "round"
+  if round_count > 1 then
+    round_plural = round_plural.."s"
+  end
   player.print(tostring(fdc_name)..", "
-               ..tostring(round_type).." in effect, "
-               ..tostring(round_count).." rounds, target "
+               ..tostring(gun_count).." guns, "
+               ..tostring(round_type)..", "
+               ..tostring(round_count).." "..round_plural..", "
                ..tostring(trp_key)..".")
 end
 
@@ -324,8 +333,10 @@ function SpawnIndirect(gun_type, round_type, round_count, fdc_pos, gun_pos, tgt_
     local dist = Position.distance(gun_pos, tgt_pos)
     local new_tgt = 
     {
-    tgt_pos.x + (gun_pos.x - fdc_pos.x) + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5)),
-    tgt_pos.y + (gun_pos.y - fdc_pos.y) + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5))
+    tgt_pos.x + (gun_pos.x - fdc_pos.x)
+              + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5)),
+    tgt_pos.y + (gun_pos.y - fdc_pos.y)
+              + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5))
     }
 
     game.surfaces["nauvis"].create_entity({
