@@ -286,10 +286,10 @@ end
 function OnFdcDestroyed(event)
   local entity = event.entity
   for k,v in pairs(global.fdc) do
-    if v[2] == entity then
+    if v == entity then
       global.fdc[k] = nil
-      global.fdc_cooldown[new_fdc_name] = nil
-      global.assigned_fire_missions[new_fdc_name] = nil
+      global.fdc_cooldown[k] = nil
+      global.assigned_fire_missions[k] = nil
       break
     end
   end
@@ -300,10 +300,10 @@ end
 --       global.assigned_fire_missions.
 function OnFdcMined(event)
   for k,v in pairs(global.fdc) do
-    if v[2] == nil or v[2].valid == false then
+    if v == nil or v.valid == false then
       global.fdc[k] = nil
-      global.fdc_cooldown[new_fdc_name] = nil
-      global.assigned_fire_missions[new_fdc_name] = nil
+      global.fdc_cooldown[k] = nil
+      global.assigned_fire_missions[k] = nil
     end
   end
 end

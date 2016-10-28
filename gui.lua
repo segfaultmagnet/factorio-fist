@@ -9,6 +9,16 @@ Licence:      Beer-Ware License Rev. 42
 GUI elements for FIST mod.
 --]]
 
+-- Post: Displays the open button.
+function ShowOpenButton(player_index)
+  GuiRestorePane(player_index)
+end
+
+-- Post: Displays the controller.
+function ShowTrpController(player_index)
+  GuiTrpController(player_index)
+end
+
 -- Pre:  Created when FIST Controller is closed.
 -- Post: Returns a pane which can re-open the FIST Controller.
 function GuiRestorePane(player_index)
@@ -74,28 +84,28 @@ function GuiTrpController(player_index)
     vertical_scroll_policy = "always"
   }
   for k,v in pairs(global.trp) do
-    local foo = player_gui.trp_ctrl.left_flow.list.add
+    player_gui.trp_ctrl.left_flow.list.add
     {
       type = "flow",
       name = k,
       direction = "horizontal"
     }
-    foo.style.minimal_height = 25
-    foo.style.maximal_height = 25
-    foo.add
+    player_gui.trp_ctrl.left_flow.list[k].style.minimal_height = 25
+    player_gui.trp_ctrl.left_flow.list[k].style.maximal_height = 25
+    player_gui.trp_ctrl.left_flow.list[k].add
     {
       type = "label",
       name = "label",
       caption = k..": "..FormatPosition(v)
     }
-    foo.label.style.minimal_width = 280
-    foo.add
+    player_gui.trp_ctrl.left_flow.list[k].label.style.minimal_width = 280
+    player_gui.trp_ctrl.left_flow.list[k].add
     {
       type = "checkbox",
-      name = k,
+      name = "checkbox",
       state = false
     }
-    foo[k].style.top_padding = 4
+    player_gui.trp_ctrl.left_flow.list[k].checkbox.style.top_padding = 4
   end
 
   SetGuiTrpDefaults(player_index)
@@ -231,7 +241,6 @@ function GuiTrpControllerCenter(player_index)
   trp_ctrl.center_flow.round_count_table.button_rounds_up.style.maximal_width = 25
   trp_ctrl.center_flow.round_count_table.button_rounds_up.style.minimal_height = 25
   trp_ctrl.center_flow.round_count_table.button_rounds_up.style.maximal_height = 25
-
 end
 
 -- Post: Creates right side of GUI for buttons.
@@ -295,12 +304,11 @@ end
 function OnButtonRoundCount(player_index, name)
   local round_count_label = game.players[player_index].gui.left.trp_ctrl.center_flow.round_count_table.round_count
   local round_count = tonumber(round_count_label.caption)
-  if name == "button_rounds_up" and round_count < MAX_ROUNDS then
-    round_count = round_count + 1
-  elseif name == "button_rounds_down" and round_count > 1 then
-    round_count = round_count - 1
+  if name == "button_rounds_up" then
+    SetRoundCount(player_index, round_count + 1)
+  elseif name == "button_rounds_down" then
+    SetRoundCount(player_index, round_count - 1)
   end
-  round_count_label.caption = round_count
 end
 
 -- Post: Removes all TRPs.
@@ -316,7 +324,7 @@ end
 function OnDeleteButton(player_index)
   local list = game.players[player_index].gui.left.trp_ctrl.left_flow.list
   for k,v in pairs(list.children_names) do
-    if list[v][v].state == true then
+    if list[v].checkbox.state == true then
       RemoveTargetReference(player_index, v)
     end
   end
@@ -334,7 +342,7 @@ function OnFireButton(player_index)
     -- Get targets to fire and insert into fire mission queue.
     local list = trp_ctrl.left_flow.list
     for k,v in pairs(list.children_names) do
-      if list[v][v].state == true then
+      if list[v].checkbox.state == true then
         table.insert(global.new_fire_missions, v)
       end
     end
@@ -362,18 +370,75 @@ function OnFireButton(player_index)
   end
 end
 
--- Post: Ensures that only one TRP is selected for firing.
-function OnTrpSelection(player_index, key)
+-- Post: Returns the number of rounds currently selected.
+function GetRoundCount(player_index)
+  local round_count_label = game.players[player_index].gui.left.trp_ctrl.center_flow.round_count_table.round_count
+  return tonumber(round_count_label.caption)
+end
+
+-- Post: Returns the type of round currently selected.
+function GetRoundType(player_index)
+  local trp_ctrl = game.players[player_index].gui.left.trp_ctrl
+  local round_type = nil
+  for _,v in pairs(trp_ctrl.center_flow.type_flow.children_names) do
+    if trp_ctrl.center_flow.type_flow[v].checkbox.state == true then
+      round_type = v
+    end
+  end
+  return string.upper(v)
+end
+
+-- Post: Returns the TRP currently selected.
+function GetSelectedTrp(player_index)
   local list = game.players[player_index].gui.left.trp_ctrl.left_flow.list
-  for k,v in pairs(list.children_names) do
-    if v ~= key then
-      list[v][v].state = false
+  local selected = {}
+  for _,v in pairs(list.children_names) do
+    if list[v].checkbox.state == true then
+      table.insert(selected, v)
     end
   end
 end
 
+-- Post: Selects the first TRP, if there is one.
+function SetDefaultTrp(player_index)
+  local trp_ctrl = game.players[player_index].gui.left.trp_ctrl
+
+  if #trp_ctrl.left_flow.list.children_names > 0 then
+    local foo = trp_ctrl.left_flow.list.children_names
+    SetTargetReference(player_index, foo[1])
+  end
+end
+
+-- Post: Selects the default round type.
+function SetDefaultRoundType(player_index)
+  local trp_ctrl = game.players[player_index].gui.left.trp_ctrl
+
+  for _,v in pairs(trp_ctrl.center_flow.type_flow.children_names) do
+    if v == DEFAULT_ROUND_TYPE then
+      trp_ctrl.center_flow.type_flow[v].checkbox.state = true
+    else
+      trp_ctrl.center_flow.type_flow[v].checkbox.state = false
+    end
+  end
+end
+
+-- Post: Sets default options for GUI.
+function SetGuiTrpDefaults(player_index)
+  SetDefaultTrp(player_index)
+  SetDefaultRoundType(player_index)
+  SetRoundCount(player_index, 1)
+end
+
+-- Post: Sets the round count.
+function SetRoundCount(player_index, round_count)
+  local round_count_label = game.players[player_index].gui.left.trp_ctrl.center_flow.round_count_table.round_count
+  if round_count <= MAX_ROUNDS and round_count > 0 then
+    round_count_label.caption = round_count
+  end
+end
+
 -- Post: Ensures that only one type of round is selected for firing.
-function OnRoundTypeSelection(player_index, key)
+function SetRoundType(player_index, key)
   local type_flow = game.players[player_index].gui.left.trp_ctrl.center_flow.type_flow
   for k,v in pairs(type_flow.children_names) do
     if v ~= key then
@@ -385,25 +450,18 @@ function OnRoundTypeSelection(player_index, key)
   end
 end
 
--- Post: Sets default options for GUI.
-function SetGuiTrpDefaults(player_index)
-  local center_flow = game.players[player_index].gui.left.trp_ctrl.center_flow
-  for k,v in pairs(center_flow.type_flow.children_names) do
-    if v == "HE" then
-      center_flow.type_flow[v].checkbox.state = true
-    else
-      center_flow.type_flow[v].checkbox.state = false
+-- Post: Ensures that only one TRP is selected for firing.
+function SetTargetReference(player_index, key)
+  local list = game.players[player_index].gui.left.trp_ctrl.left_flow.list
+
+  if key == nil then
+    SetDefaultTrp(player_index)
+  else
+    for k,v in pairs(list.children_names) do
+      if v ~= key then
+        list[v].checkbox.state = false
+      end
     end
+    list[key].checkbox.state = true
   end
-  center_flow.round_count_table.round_count.caption = 1
-end
-
--- Post: Displays the open button.
-function ShowOpenButton(player_index)
-  GuiRestorePane(player_index)
-end
-
--- Post: Displays the controller.
-function ShowTrpController(player_index)
-  GuiTrpController(player_index)
 end

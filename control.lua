@@ -149,12 +149,12 @@ Event.register(defines.events.on_gui_checked_state_changed, function(event)
 
   -- Target selection checkboxes.
   if element.parent.parent == trp_ctrl.left_flow.list then
-    OnTrpSelection(player_index, element.name)
+    SetTargetReference(player_index, element.parent.name)
   end
 
   -- Round selection checkboxes.
   if element.parent.parent == trp_ctrl.center_flow.type_flow then
-    OnRoundTypeSelection(player_index, element.parent.name)
+    SetRoundType(player_index, element.parent.name)
   end
 end)
 
