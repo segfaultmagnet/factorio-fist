@@ -9,10 +9,6 @@ Licence:      Beer-Ware License Rev. 42
 Configuration data for FIST mod, notably projectile information.
 --]]
 
-DEBUG = true
-
-TESTING_GUN_TYPE = "mortar-81"
-TESTING_ROUND_COUNT = 1
 
 ALPHA = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q",
          "R","S","T","U","V","W","X","Y","Z"}
@@ -23,24 +19,26 @@ PHONETIC = {"Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel",
 HOLLYWOOD = {"Hangman", "Lightning", "Rain", "Slinger", "Steel", "Storm",
              "Thunder", "Twisted"}
 
-MINIMUM_SAFE_DISTANCE = 40
-
-MAX_TRP = 8
-
+GUN_TYPES = {"mortar-81"}
+COOLDOWN_BETWEEN_ROUNDS = {}
+COOLDOWN_BETWEEN_ROUNDS[GUN_TYPES[1]] = 180
 MAX_RANGE = {}
-MAX_RANGE["mortar-81"] = 300
-
+MAX_RANGE[GUN_TYPES[1]] = 300
 MUZZLE_VELOCITY = {}
-MUZZLE_VELOCITY["mortar-81"] = 0.1
+MUZZLE_VELOCITY[GUN_TYPES[1]] = 0.1
+ROUND_TYPES = {}
+ROUND_TYPES[GUN_TYPES[1]] = {"HE", "VT"}
 
 FDC_CONTROL_RADIUS = 3
-
 FIRE_LOCKOUT = 60
+MINIMUM_SAFE_DISTANCE = 40
+MAX_ROUNDS = 5
+MAX_TRP = 8
+
+ROUND_DESCRIPTION = {}
+ROUND_DESCRIPTION["HE"] = "High Explosive"
+ROUND_DESCRIPTION["VT"] = "High Explosive, Proximity Fuze (Air Burst)"
 
 ROUND_DISPERSION_FACTOR = {}
 ROUND_DISPERSION_FACTOR["HE"] = 0.05
 ROUND_DISPERSION_FACTOR["VT"] = 0.08
-
-ROUND_TYPES = {}
-ROUND_TYPES["HE"] = "High Explosive"
-ROUND_TYPES["VT"] = "High Explosive, Proximity Fuze (Air Burst)"

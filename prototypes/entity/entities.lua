@@ -15,7 +15,34 @@ data:extend(
       }
     }
   },
-
+  {
+    type = "decorative",
+    name = "minus",
+    flags = {"not-on-map"},
+    icon = "__FIST__/graphics/icons/minus.png",
+    pictures =
+    {
+      {
+        filename = "__FIST__/graphics/icons/minus.png",
+        width = 32,
+        height = 32
+      }
+    }
+  },
+  {
+    type = "decorative",
+    name = "plus",
+    flags = {"not-on-map"},
+    icon = "__FIST__/graphics/icons/plus.png",
+    pictures =
+    {
+      {
+        filename = "__FIST__/graphics/icons/plus.png",
+        width = 32,
+        height = 32
+      }
+    }
+  },
   {
     type = "explosion",
     name = "gunshot-mortar",

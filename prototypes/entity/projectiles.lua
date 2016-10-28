@@ -47,7 +47,7 @@ data:extend(
             action =
             {
               type = "area",
-              perimeter = 2,
+              perimeter = 3,
               action_delivery =
               {
                 type = "instant",
@@ -105,7 +105,7 @@ data:extend(
             action =
             {
               type = "area",
-              perimeter = 4,
+              perimeter = 6,
               action_delivery =
               {
                 type = "instant",
@@ -116,7 +116,7 @@ data:extend(
                     damage =
                     {
                       type = "explosion",
-                      amount = 50
+                      amount = 60
                     },
                     {
                       type = "create-entity",

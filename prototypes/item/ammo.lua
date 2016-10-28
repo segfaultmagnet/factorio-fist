@@ -46,6 +46,7 @@ data:extend(
     subgroup = "ammo",
     order = "d[mortar-81]-a[he]",
     stack_size = 100,
+    fuel_value = "81kJ",
     ammo_type =
     {
       category = "mortar-81",
@@ -61,7 +62,7 @@ data:extend(
           starting_speed = 0.1,
           direction_deviation = 0.5,
           range_deviation = 0.5,
-          max_range = 180,
+          max_range = 300,
           source_effects =
           {
             type = "create-explosion",

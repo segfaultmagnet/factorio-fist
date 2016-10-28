@@ -13,12 +13,10 @@ calls seen here.
 To-Do:
 
 Implement inventory for FDC and mortars.
-
-Create queue with delays for projectile spawning.
-
-Add round count selection.
 ----------------------------------------
 --]]
+
+DEBUG = true
 
 require("stdlib.area.position")
 require("stdlib.event.event")
@@ -29,18 +27,23 @@ require("config")
 require("fist")
 require("gui")
 
+TESTING_GUN_TYPE = GUN_TYPES[1]
+TESTING_ROUND_COUNT = 4
+
 -- Table of Fire Direction Centers and counters for naming.
 global.fdc = {}
+global.fdc_cooldown = {}
 
 -- Table of Target Reference Points and counters for naming.
 global.trp = {}
 global.trp_counter = {1, 1, -1}
 
+-- Table of queued Fire Missions.
+global.new_fire_missions = {}
+global.assigned_fire_missions = {}
+
 -- Used to temporarily lock out the Fire button.
 fire_button_disable = 0
-
--- Table of queued Fire Missions.
-fire_mission_queue = {}
 
 local new_trp_player_index = nil
 local new_trp_pos = nil
@@ -75,9 +78,14 @@ end)
 -- Post: Check for fo-gun-blanks each tick.
 --       Check if the player has marked a new target with his/her fo-gun.
 Event.register(defines.events.on_tick, function(event)
-  -- Decrement the Fire button lockout.
+  -- Decrement the Fire button lockout and firing cooldowns.
   if fire_button_disable > 0 then
     fire_button_disable = fire_button_disable - 1
+  end
+  for k,_ in pairs(global.fdc) do
+    if global.fdc_cooldown[k] > 0 then
+      global.fdc_cooldown[k] = global.fdc_cooldown[k] - 1
+    end
   end
 
   -- Check for fo-gun-blanks.
@@ -90,6 +98,15 @@ Event.register(defines.events.on_tick, function(event)
   end
   new_trp_player_index = nil
   new_trp_pos = nil
+
+  -- Process queued fire missions.
+  for k,v in pairs(global.fdc) do
+    if global.fdc_cooldown[k] == 0 and #global.assigned_fire_missions[k] > 0 then
+      local foo = table.remove(global.assigned_fire_missions[k], 1)
+      global.fdc_cooldown[k] = COOLDOWN_BETWEEN_ROUNDS[foo[1]]
+      ExecuteFireMission(k, foo[1], foo[2], foo[3])
+    end
+  end
 end)
 
 -- Check for newly-built FDCs and guns.
@@ -136,8 +153,8 @@ Event.register(defines.events.on_gui_checked_state_changed, function(event)
   end
 
   -- Round selection checkboxes.
-  if element.parent == trp_ctrl.center_flow.checkbox_flow then
-    OnRoundTypeSelection(player_index, element.name)
+  if element.parent.parent == trp_ctrl.center_flow.type_flow then
+    OnRoundTypeSelection(player_index, element.parent.name)
   end
 end)
 
@@ -156,6 +173,8 @@ Event.register(defines.events.on_gui_click, function(event)
     ShowOpenButton(player_index)
   elseif string.contains(name, "button_open") then
     ShowTrpController(player_index)
+  elseif string.contains(name, "button_rounds_") then
+    OnButtonRoundCount(player_index, name)
   end
 end)
 

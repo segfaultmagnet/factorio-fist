@@ -53,29 +53,34 @@ function EvaluateNewTargets(player_index, pos)
 end
 
 -- Pre:  Called when there at least one fire mission queued.
--- Post: Determines which FDC will handle the fire mission and executes it.
-function ExecuteFireMissions(player_index, gun_type, round_type, round_count)
+-- Post: Determines which FDC will handle the fire mission and adds it to that
+--       FDC's queue.
+function EvaluateNewFireMissions(player_index, gun_type, round_type, round_count)
   local player = game.players[player_index]
-  while #fire_mission_queue > 0 do
+  while #global.new_fire_missions > 0 do
 
     local i = 0
-    for _,v in pairs(fire_mission_queue) do
+    for _,v in pairs(global.new_fire_missions) do
       local nearest_fdc_key = nil
       local nearest_fdc_entity = nil
       local nearest_range = nil
       i = i + 1
 
       -- Determine distances to TRP from each FDC.
-      if #global.fdc > 0 then
-        for _,w in pairs(global.fdc) do
-          local gun_count = #GetFdcConnectedGuns(w[2], gun_type)
-          local this_range = Position.distance(w[2].position, global.trp[v])
+      local fdc_count = 0
+      for l,w in pairs(global.fdc) do
+        fdc_count = fdc_count + 1
+      end
+      if fdc_count > 0 then
+        for l,w in pairs(global.fdc) do
+          local gun_count = #GetFdcConnectedGuns(l, gun_type)
+          local this_range = Position.distance(w.position, global.trp[v])
           if this_range <= MAX_RANGE[gun_type]
             and this_range >= MINIMUM_SAFE_DISTANCE
             and gun_count > 0
             and (nearest_range == nil or this_range < nearest_range) then
-            nearest_fdc_key = w[1]
-            nearest_fdc_entity = w[2]
+            nearest_fdc_key = l
+            nearest_fdc_entity = w.position
             nearest_range = this_range
           end
         end
@@ -83,31 +88,67 @@ function ExecuteFireMissions(player_index, gun_type, round_type, round_count)
         -- If there is an FDC in range of the TRP, give the current mission to the
         -- nearest one for firing.
         if nearest_fdc_key ~= nil then
-          local guns = GetFdcConnectedGuns(nearest_fdc_entity, gun_type)
+          for i = 1, round_count do
+            table.insert(global.assigned_fire_missions[nearest_fdc_key],
+                        {gun_type, round_type, v})
+          end
+          local guns = GetFdcConnectedGuns(nearest_fdc_key, gun_type)
           MessageToObserver(player_index, nearest_fdc_key, #guns,
                             string.upper(round_type), round_count, v)
-
-          for _,g in pairs(guns) do
-            SpawnIndirect(gun_type, round_type, round_count,
-                          nearest_fdc_entity.position, g.position, global.trp[v])
-          end
         else
-          player.print("No FDC within range of "..v.."!")
+          player.print("No FDC able to fire "..v.."!")
         end
       else
         player.print("No FDC available!")
       end
 
-      table.remove(fire_mission_queue, i)
+      table.remove(global.new_fire_missions, i)
     end
+  end
+end
+
+-- Post: Spawns new projectiles of round type, moving from gun_pos to tgt_pos.
+function ExecuteFireMission(fdc_key, gun_type, round_type, trp_key)
+  local fdc_pos = global.fdc[fdc_key].position
+  local tgt_pos = global.trp[trp_key]
+
+  local guns = GetFdcConnectedGuns(fdc_key, gun_type)
+  for _,g in pairs(guns) do
+    local gun_pos = g.position
+    local dist = Position.distance(gun_pos, tgt_pos)
+    local new_tgt = 
+    {
+    tgt_pos.x + (gun_pos.x - fdc_pos.x)
+              + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5)),
+    tgt_pos.y + (gun_pos.y - fdc_pos.y)
+              + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5))
+    }
+
+    game.surfaces["nauvis"].create_entity({
+      name = gun_type.."-"..string.lower(round_type),
+      amount = 1,
+      position = gun_pos,
+      target = new_tgt,
+      speed = MUZZLE_VELOCITY[gun_type]
+    })
+    game.surfaces["nauvis"].create_entity({
+      name = "gunshot-mortar",
+      amount = 1,
+      position = gun_pos,
+      target = new_tgt
+    })
   end
 end
 
 -- Pre:  fdc is the FDC.
 --       gun_type is the name of the guns to be searched for (e.g. "mortar-81").
 -- Post: Returns a table of all guns within the FDC's circuit network.
-function GetFdcConnectedGuns(fdc, gun_type)
-  local connected = fdc.circuit_connected_entities
+function GetFdcConnectedGuns(fdc_key, gun_type)
+  if type(fdc_key) ~= "string" then
+    error("Not a string!")
+    print(debug.traceback)
+  end
+  local connected = global.fdc[fdc_key].circuit_connected_entities
   local guns = {}
   if connected ~= nil then
     for _,v in pairs(connected["red"]) do
@@ -221,7 +262,8 @@ function MessageToObserver(player_index, fdc_name, gun_count, round_type, round_
   if round_count > 1 then
     round_plural = round_plural.."s"
   end
-  player.print(tostring(fdc_name)..", "
+  player.print("Message to observer: "
+               ..tostring(fdc_name)..", "
                ..tostring(gun_count).." guns, "
                ..tostring(round_type)..", "
                ..tostring(round_count).." "..round_plural..", "
@@ -233,27 +275,35 @@ end
 --       are appended to fdc.
 function OnFdcPlaced(event)
   local new_fdc_name = GenerateFdcName()
-  table.insert(global.fdc, {new_fdc_name, event.created_entity})
+  global.fdc[new_fdc_name] = event.created_entity
+  global.fdc_cooldown[new_fdc_name] = 0
+  global.assigned_fire_missions[new_fdc_name] = {}
 end
 
 -- Pre:  Called when an FDC is destroyed.
--- Post: FDC is removed from fdc.
+-- Post: Removes the destroyed FDC from global.fdc, global.fdc_cooldown, and
+--       global.assigned_fire_missions.
 function OnFdcDestroyed(event)
   local entity = event.entity
   for k,v in pairs(global.fdc) do
     if v[2] == entity then
-      table.remove(global.fdc, k)
+      global.fdc[k] = nil
+      global.fdc_cooldown[new_fdc_name] = nil
+      global.assigned_fire_missions[new_fdc_name] = nil
       break
     end
   end
 end
 
 -- Pre:  Called when an FDC is mined by a player.
--- Post: FDC is removed from fdc.
+-- Post: Removes the mined FDC from global.fdc, global.fdc_cooldown, and
+--       global.assigned_fire_missions.
 function OnFdcMined(event)
   for k,v in pairs(global.fdc) do
     if v[2] == nil or v[2].valid == false then
-      table.remove(global.fdc, k)
+      global.fdc[k] = nil
+      global.fdc_cooldown[new_fdc_name] = nil
+      global.assigned_fire_missions[new_fdc_name] = nil
     end
   end
 end
@@ -282,10 +332,32 @@ function OnGunPlaced(event)
     end
   end
 
-  -- Wire them together.
+  -- Face gun toward FDC and wire them together.
   if nearest_fdc ~= nil then
+    local dir_x = gun.position.x - nearest_fdc.position.x
+    local dir_y = gun.position.y - nearest_fdc.position.y
+    local tan = math.tan(math.abs(dir_x) / math.abs(dir_y))
+    local dir = defines.direction.north
+    if tan > 0 then
+      if dir_y > 0 then dir = defines.direction.north
+      else dir = defines.direction.south
+      end
+    else
+      if dir_x > 0 then dir = defines.direction.west
+      else dir = defines.direction.east
+      end
+    end
+    gun.direction = dir
     nearest_fdc.connect_neighbour({wire = defines.wire_type.red, target_entity = gun})
   end
+
+  -- Make sure the FDC is set up to request the appropriate kind of ammo.
+  --[[
+  local 
+  for i = 1, nearest_fdc.request_slot_count do
+    if 
+  end
+  --]]
 end
 
 -- Post: Sets the number of fo-gun-blank rounds in the player's ammo inventory
@@ -323,34 +395,5 @@ function SetBlanks(player_index, count)
         stack.clear()
       end
     end
-  end
-end
-
--- Post: Spawns new projectiles of round type, moving from gun_pos to tgt_pos.
-function SpawnIndirect(gun_type, round_type, round_count, fdc_pos, gun_pos, tgt_pos)
-  -- Need to randomize impact position.
-  for i = 1, round_count do
-    local dist = Position.distance(gun_pos, tgt_pos)
-    local new_tgt = 
-    {
-    tgt_pos.x + (gun_pos.x - fdc_pos.x)
-              + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5)),
-    tgt_pos.y + (gun_pos.y - fdc_pos.y)
-              + (dist * ROUND_DISPERSION_FACTOR[round_type] * (math.random() - 0.5))
-    }
-
-    game.surfaces["nauvis"].create_entity({
-      name = gun_type.."-"..string.lower(round_type),
-      amount = 1,
-      position = gun_pos,
-      target = new_tgt,
-      speed = MUZZLE_VELOCITY[gun_type]
-    })
-    game.surfaces["nauvis"].create_entity({
-      name = "gunshot-mortar",
-      amount = 1,
-      position = gun_pos,
-      target = new_tgt
-    })
   end
 end
