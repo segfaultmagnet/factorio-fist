@@ -2,7 +2,7 @@
 Name:         gui.lua
 Authors:      Matthew Sheridan
 Date:         21 October 2016
-Revision:     24 October 2016
+Revision:     28 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 

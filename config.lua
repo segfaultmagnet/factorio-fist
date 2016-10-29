@@ -2,7 +2,7 @@
 Name:         config.lua
 Authors:      Matthew Sheridan
 Date:         23 October 2016
-Revision:     24 October 2016
+Revision:     28 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 
@@ -26,6 +26,10 @@ MINIMUM_SAFE_DISTANCE = 40
 MAX_ROUNDS = 5
 MAX_TRP = 8
 
+ROUND_COUNT_WARNING = {}
+ROUND_COUNT_WARNING["amber"] = 25
+ROUND_COUNT_WARNING["red"] = 15
+
 ROUND_DESCRIPTION = {}
 ROUND_DESCRIPTION["HE"] = "High Explosive"
 ROUND_DESCRIPTION["VT"] = "High Explosive, Proximity Fuze (Air Burst)"
@@ -36,9 +40,14 @@ guns =
   {
     name = "Howitzer, 155mm",
     entity_name = "howitzer-155",
+    caliber = "155mm",
     cooldown = 900,
     max_range = 1500,
     ammo_type = {
+      HE = "howitzer-155-he",
+      VT = "howitzer-155-he"
+    },
+    projectile_type = {
       HE = "howitzer-155-he",
       VT = "howitzer-155-vt"
     },
@@ -54,9 +63,14 @@ guns =
   {
     name = "Mortar, 81mm",
     entity_name = "mortar-81",
+    caliber = "81mm",
     cooldown = 240,
     max_range = 300,
     ammo_type = {
+      HE = "mortar-81-he",
+      VT = "mortar-81-he"
+    },
+    projectile_type = {
       HE = "mortar-81-he",
       VT = "mortar-81-vt"
     },

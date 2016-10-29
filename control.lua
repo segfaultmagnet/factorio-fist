@@ -2,7 +2,7 @@
 Name:         control.lua
 Authors:      Matthew Sheridan
 Date:         20 October 2016
-Revision:     24 October 2016
+Revision:     28 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 
@@ -12,7 +12,12 @@ calls seen here.
 ----------------------------------------
 To-Do:
 
-Implement inventory for FDC and mortars.
+Clean up GUI: implement functions to add/remove TRP from list without requiring
+a complete refresh.
+
+Make better target_effect explosions.
+
+Sprites!
 ----------------------------------------
 --]]
 
@@ -63,12 +68,11 @@ Event.register(defines.events.on_player_created, function(event)
       player.character.insert({name="steel-axe",count=3})
       player.character.insert({name="fo-gun",count=1})
       player.character.insert({name="grenade",count=20})
-      player.character.insert({name="red-wire",count=30})
-      player.character.insert({name="fdc",count=5})
-      player.character.insert({name="howitzer-155",count=20})
-      player.character.insert({name="howitzer-155-he",count=30})
-      player.character.insert({name="mortar-81",count=20})
-      player.character.insert({name="mortar-81-he",count=30})
+      player.character.insert({name="fdc",count=2})
+      player.character.insert({name="howitzer-155",count=4})
+      player.character.insert({name="mortar-81",count=8})
+      player.character.insert({name="howitzer-155-he",count=500})
+      player.character.insert({name="mortar-81-he",count=500})
     end
     ----------------------------------------
   end

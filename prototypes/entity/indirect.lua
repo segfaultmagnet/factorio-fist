@@ -59,7 +59,7 @@ data:extend(
     }
   },
   {
-    type = "container",
+    type = "logistic-container",
     name = "howitzer-155",
     icon = "__FIST__/graphics/icons/howitzer-155.png",
     flags = {"placeable-player", "player-creation"},
@@ -67,7 +67,8 @@ data:extend(
     selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
     corpse = "medium-remnants",
     dying_explosion = "medium-explosion",
-    inventory_size = 1,
+    inventory_size = 2,
+    logistic_mode = "requester",
     max_health = 200,
     minable = {mining_time = 0.5, result = "howitzer-155"},
     circuit_wire_connection_point =
@@ -119,7 +120,8 @@ data:extend(
     selection_box = {{-1, -1}, {1, 1}},
     corpse = "small-remnants",
     dying_explosion = "medium-explosion",
-    inventory_size = 1,
+    inventory_size = 2,
+    logistic_mode = "requester",
     max_health = 150,
     minable = {mining_time = 0.5, result = "mortar-81"},
     circuit_wire_connection_point =

@@ -2,7 +2,7 @@
 Name:         fist.lua
 Authors:      Matthew Sheridan
 Date:         22 October 2016
-Revision:     24 October 2016
+Revision:     28 October 2016
 Copyright:    Matthew Sheridan 2016
 Licence:      Beer-Ware License Rev. 42
 
@@ -128,55 +128,58 @@ function EvaluateNewFireMissions(player_index, round_type, round_count)
 end
 
 -- Post: Spawns new projectiles of round type, moving from gun_pos to tgt_pos.
+--       Appropriate amount of ammunition for this mission is removed from FDC.
 function ExecuteFireMission(fdc_key, gun_type, round_type, tgt_pos)
   local fdc_pos = global.fdc[fdc_key].position
   local fdc_guns = GetFdcConnectedGuns(fdc_key, gun_type)
+  local stack = global.fdc[fdc_key].get_inventory(1).find_item_stack(gun_type.ammo_type[round_type])
   for _,g in pairs(fdc_guns) do
-    local gun_pos = g.position
-    local dist = Position.distance(gun_pos, tgt_pos)
-    local new_tgt = 
-    {
-    tgt_pos.x + (gun_pos.x - fdc_pos.x)
-              + (dist * gun_type.dispersion[round_type] * (math.random() - 0.5)),
-    tgt_pos.y + (gun_pos.y - fdc_pos.y)
-              + (dist * gun_type.dispersion[round_type] * (math.random() - 0.5))
-    }
+    local go = false
+    local gun_stack = g.get_inventory(1).find_item_stack(gun_type.ammo_type[round_type])
+    if gun_stack ~= nil and gun_stack.valid_for_read and gun_stack.count > 0 then
+      gun_stack.count = gun_stack.count - 1
+      go = true
+    elseif stack ~= nil and stack.valid_for_read and stack.count > 0 then
+      stack.count = stack.count - 1
+      go = true
+    end
 
-    game.surfaces["nauvis"].create_entity({
-      name = gun_type.ammo_type[round_type],
-      amount = 1,
-      position = gun_pos,
-      target = new_tgt,
-      speed = gun_type.velocity * (1 + (gun_type.max_velocity_variation * (math.random() - 0.5)))
-    })
-    game.surfaces["nauvis"].create_entity({
-      name = gun_type.muzzle_entity,
-      amount = 1,
-      position = gun_pos,
-      target = new_tgt
-    })
-  end
-end
+    if go then
+      local gun_pos = g.position
+      local dist = Position.distance(gun_pos, tgt_pos)
+      local new_tgt = 
+      {
+      tgt_pos.x + (gun_pos.x - fdc_pos.x)
+                + (dist * gun_type.dispersion[round_type] * (math.random() - 0.5)),
+      tgt_pos.y + (gun_pos.y - fdc_pos.y)
+                + (dist * gun_type.dispersion[round_type] * (math.random() - 0.5))
+      }
 
--- Pre:  fdc is the FDC.
---       gun_type is type of the guns to be searched for (see table: guns).
--- Post: Returns a table of all guns within the FDC's circuit network.
-function GetFdcConnectedGuns(fdc_key, gun_type)
-  if type(fdc_key) ~= "string" then
-    error("Not a string!")
-    print(debug.traceback)
-  end
-  local connected = global.fdc[fdc_key].circuit_connected_entities
-  local guns = {}
-  if connected ~= nil then
-    for _,v in pairs(connected["red"]) do
-      if v.name == gun_type.entity_name then
-        table.insert(guns, v)
-      end
+      game.surfaces["nauvis"].create_entity({
+        name = gun_type.projectile_type[round_type],
+        amount = 1,
+        position = gun_pos,
+        target = new_tgt,
+        speed = gun_type.velocity * (1 + (gun_type.max_velocity_variation * (math.random() - 0.5)))
+      })
+      game.surfaces["nauvis"].create_entity({
+        name = gun_type.muzzle_entity,
+        amount = 1,
+        position = gun_pos,
+        target = new_tgt
+      })
     end
   end
 
-  return guns
+  if stack ~= nil and stack.valid_for_read then
+    if stack.count < ROUND_COUNT_WARNING["red"] then
+      PrintLowAmmo(fdc_key, "red", gun_type.caliber, round_type)
+    elseif stack.count < ROUND_COUNT_WARNING["amber"] then
+      PrintLowAmmo(fdc_key, "amber", gun_type.caliber, round_type)
+    end
+  else
+    PrintLowAmmo(fdc_key, "black", gun_type.caliber, round_type)
+  end
 end
 
 -- Post: Checks to see if the player has fo-gun in their gun inventory or if
@@ -273,6 +276,27 @@ function GenerateTargetReference()
   return key
 end
 
+-- Pre:  fdc is the FDC.
+--       gun_type is type of the guns to be searched for (see table: guns).
+-- Post: Returns a table of all guns within the FDC's circuit network.
+function GetFdcConnectedGuns(fdc_key, gun_type)
+  if type(fdc_key) ~= "string" then
+    error("Not a string!")
+    print(debug.traceback)
+  end
+  local connected = global.fdc[fdc_key].circuit_connected_entities
+  local guns = {}
+  if connected ~= nil then
+    for _,v in pairs(connected["red"]) do
+      if v.name == gun_type.entity_name then
+        table.insert(guns, v)
+      end
+    end
+  end
+
+  return guns
+end
+
 -- Post: Sends message to the player calling the fire mission.
 function GetMTO(fdc_name, gun_count, round_type, round_count, trp_key)
   local round_plural = "round"
@@ -350,6 +374,11 @@ function OnGunPlaced(event)
   if nearest_fdc ~= nil then
     nearest_fdc.connect_neighbour({wire = defines.wire_type.red, target_entity = gun})
   end
+end
+
+function PrintLowAmmo(fdc_key, condition, caliber, round_type)
+  Game.print_all("Warning: "..fdc_key.." is "..string.upper(condition).." on "
+                 ..caliber.." "..round_type.." ammo!")
 end
 
 -- Post: Fire missions for each FDC are handled and executed in order.
