@@ -16,14 +16,41 @@ data:extend(
   },
   {
     type = "recipe",
-    name = "mortar-81",
+    name = "howitzer-155",
+    enabled = false,
+    energy_required = 10,
+    ingredients =
+    {
+      {"steel-plate", 15},
+      {"iron-plate", 12},
+      {"iron-gear-wheel", 6}
+    },
+    result = "howitzer-155"
+  },
+  {
+    type = "recipe",
+    name = "howitzer-155-he",
     enabled = false,
     energy_required = 10,
     ingredients =
     {
       {"steel-plate", 5},
-      {"iron-plate", 5},
-      {"iron-gear-wheel", 2}
+      {"plastic-bar", 5},
+      {"explosives", 5},
+      {"iron-plate", 10}
+    },
+    result = "howitzer-155-he"
+  },
+  {
+    type = "recipe",
+    name = "mortar-81",
+    enabled = false,
+    energy_required = 10,
+    ingredients =
+    {
+      {"steel-plate", 10},
+      {"iron-plate", 10},
+      {"iron-gear-wheel", 3}
     },
     result = "mortar-81"
   },
@@ -37,7 +64,7 @@ data:extend(
       {"steel-plate", 2},
       {"plastic-bar", 2},
       {"explosives", 2},
-      {"iron-plate", 1}
+      {"iron-plate", 2}
     },
     result = "mortar-81-he"
   },

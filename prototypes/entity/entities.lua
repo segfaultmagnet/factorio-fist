@@ -45,6 +45,95 @@ data:extend(
   },
   {
     type = "explosion",
+    name = "gunshot-howitzer",
+    flags = {"not-on-map"},
+    animations =
+    {
+      {
+        filename = "__base__/graphics/entity/explosion-gunshot/explosion-gunshot.png",
+        priority = "extra-high",
+        width = 34,
+        height = 38,
+        frame_count = 2,
+        animation_speed = 1.5,
+        shift = {0, 0}
+      },
+      {
+        filename = "__base__/graphics/entity/explosion-gunshot/explosion-gunshot.png",
+        priority = "extra-high",
+        width = 34,
+        height = 38,
+        x = 34 * 2,
+        frame_count = 2,
+        animation_speed = 1.5,
+        shift = {0, 0}
+      },
+      {
+        filename = "__base__/graphics/entity/explosion-gunshot/explosion-gunshot.png",
+        priority = "extra-high",
+        width = 34,
+        height = 38,
+        x = 34 * 4,
+        frame_count = 3,
+        animation_speed = 1.5,
+        shift = {0, 0}
+      },
+      {
+        filename = "__base__/graphics/entity/explosion-gunshot/explosion-gunshot.png",
+        priority = "extra-high",
+        width = 34,
+        height = 38,
+        x = 34 * 7,
+        frame_count = 3,
+        animation_speed = 1.5,
+        shift = {0, 0}
+      },
+      {
+        filename = "__base__/graphics/entity/explosion-gunshot/explosion-gunshot.png",
+        priority = "extra-high",
+        width = 34,
+        height = 38,
+        x = 34 * 10,
+        frame_count = 3,
+        animation_speed = 1.5,
+        shift = {0, 0}
+      }
+    },
+    rotate = true,
+    light = {intensity = 2, size = 20},
+    smoke = "smoke-fast",
+    smoke_count = 3,
+    smoke_slow_down_factor = 1,
+    sound =
+    {
+      aggregation =
+      {
+        max_count = 1,
+        remove = true
+      },
+      variations =
+      {
+        {
+          filename = "__base__/sound/fight/heavy-gunshot-1.ogg",
+          volume = 1
+        },
+        {
+          filename = "__base__/sound/fight/heavy-gunshot-2.ogg",
+          volume = 1
+        },
+        {
+          filename = "__base__/sound/fight/heavy-gunshot-3.ogg",
+          volume = 1
+        },
+        {
+          filename = "__base__/sound/fight/heavy-gunshot-3.ogg",
+          volume = 1
+        }
+      }
+    }
+  },
+  {
+    type = "explosion",
     name = "gunshot-mortar",
     flags = {"not-on-map"},
     animations =
@@ -100,7 +189,7 @@ data:extend(
       }
     },
     rotate = true,
-    light = {intensity = 1, size = 10},
+    light = {intensity = 1, size = 6},
     smoke = "smoke-fast",
     smoke_count = 1,
     smoke_slow_down_factor = 1,
@@ -115,19 +204,19 @@ data:extend(
       {
         {
           filename = "__base__/sound/fight/heavy-gunshot-1.ogg",
-          volume = 0.75
+          volume = 0.6
         },
         {
           filename = "__base__/sound/fight/heavy-gunshot-2.ogg",
-          volume = 0.75
+          volume = 0.6
         },
         {
           filename = "__base__/sound/fight/heavy-gunshot-3.ogg",
-          volume = 0.75
+          volume = 0.6
         },
         {
           filename = "__base__/sound/fight/heavy-gunshot-3.ogg",
-          volume = 0.75
+          volume = 0.6
         }
       }
     }

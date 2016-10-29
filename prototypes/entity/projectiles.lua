@@ -1,5 +1,148 @@
 data:extend(
 {
+
+  {
+    type = "projectile",
+    name = "howitzer-155-he",
+    flags = {"not-on-map"},
+    acceleration = 0.005,
+    speed = 0.25,
+    piercing_damage = 100,
+    action =
+    {
+      type = "direct",
+      action_delivery =
+      {
+        type = "instant",
+        target_effects =
+        {
+          {
+            type = "create-entity",
+            entity_name = "big-explosion",
+            check_buildability = true
+          },
+          {
+            type = "nested-result",
+            action =
+            {
+              type = "direct",
+              action_delivery =
+              {
+                type = "instant",
+                target_effects =
+                {
+                  {
+                    type = "damage",
+                    damage =
+                    {
+                      type = "physical",
+                      amount = 80
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            type = "nested-result",
+            action =
+            {
+              type = "area",
+              perimeter = 5,
+              action_delivery =
+              {
+                type = "instant",
+                target_effects =
+                {
+                  {
+                    type = "damage",
+                    damage =
+                    {
+                      type = "explosion",
+                      amount = 80
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    light = {intensity = 0, size = 0},
+    animation =
+    {
+      filename = "__FIST__/graphics/icons/blank.png",
+      frame_count = 1,
+      line_length = 1,
+      width = 8,
+      height = 8,
+      shift = {0, 0},
+      priority = "high"
+    }
+  },
+  {
+    type = "projectile",
+    name = "howitzer-155-vt",
+    flags = {"not-on-map"},
+    acceleration = 0.005,
+    speed = 0.25,
+    piercing_damage = 0,
+    action =
+    {
+      type = "direct",
+      action_delivery =
+      {
+        type = "instant",
+        target_effects =
+        {
+          {
+            type = "create-entity",
+            entity_name = "explosion",
+            check_buildability = true
+          },
+          {
+            type = "nested-result",
+            action =
+            {
+              type = "area",
+              perimeter = 10,
+              action_delivery =
+              {
+                type = "instant",
+                target_effects =
+                {
+                  {
+                    type = "damage",
+                    damage =
+                    {
+                      type = "explosion",
+                      amount = 120
+                    },
+                    {
+                      type = "create-entity",
+                      entity_name = "explosion"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    light = {intensity = 0, size = 0},
+    animation =
+    {
+      filename = "__FIST__/graphics/icons/blank.png",
+      frame_count = 1,
+      line_length = 1,
+      width = 8,
+      height = 8,
+      shift = {0, 0},
+      priority = "high"
+    }
+  },
   {
     type = "projectile",
     name = "mortar-81-he",
@@ -68,7 +211,7 @@ data:extend(
         }
       }
     },
-    light = {intensity = 0, size = 1},
+    light = {intensity = 0, size = 0},
     animation =
     {
       filename = "__FIST__/graphics/icons/blank.png",
@@ -130,7 +273,7 @@ data:extend(
         }
       }
     },
-    light = {intensity = 0, size = 1},
+    light = {intensity = 0, size = 0},
     animation =
     {
       filename = "__FIST__/graphics/icons/blank.png",

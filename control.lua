@@ -27,9 +27,6 @@ require("config")
 require("fist")
 require("gui")
 
-TESTING_GUN_TYPE = GUN_TYPES[1]
-TESTING_ROUND_COUNT = 4
-
 -- Table of Fire Direction Centers and counters for naming.
 global.fdc = {}
 global.fdc_cooldown = {}
@@ -68,6 +65,8 @@ Event.register(defines.events.on_player_created, function(event)
       player.character.insert({name="grenade",count=20})
       player.character.insert({name="red-wire",count=30})
       player.character.insert({name="fdc",count=5})
+      player.character.insert({name="howitzer-155",count=20})
+      player.character.insert({name="howitzer-155-he",count=30})
       player.character.insert({name="mortar-81",count=20})
       player.character.insert({name="mortar-81-he",count=30})
     end
@@ -94,27 +93,24 @@ Event.register(defines.events.on_tick, function(event)
   -- Process any newly-marked targets.
   if new_trp_player_index ~= nil and new_trp_pos ~= nil then
     EvaluateNewTargets(new_trp_player_index, new_trp_pos)
-    ShowTrpController(new_trp_player_index)
   end
   new_trp_player_index = nil
   new_trp_pos = nil
 
   -- Process queued fire missions.
-  for k,v in pairs(global.fdc) do
-    if global.fdc_cooldown[k] == 0 and #global.assigned_fire_missions[k] > 0 then
-      local foo = table.remove(global.assigned_fire_missions[k], 1)
-      global.fdc_cooldown[k] = COOLDOWN_BETWEEN_ROUNDS[foo[1]]
-      ExecuteFireMission(k, foo[1], foo[2], foo[3])
-    end
-  end
+  ProcessAssignedFireMissions()
 end)
 
 -- Check for newly-built FDCs and guns.
 Event.register(defines.events.on_built_entity, function(event)
   if event.created_entity.name == "fdc" then
     OnFdcPlaced(event)
-  elseif event.created_entity.name == "mortar-81" then
-    OnGunPlaced(event)
+  else
+    for _,g in pairs(guns) do
+      if event.created_entity.name == g.entity_name then
+        OnGunPlaced(event)
+      end
+    end
   end
 end)
 
@@ -122,8 +118,12 @@ end)
 Event.register(defines.events.on_robot_built_entity, function(event)
   if event.entity.name == "fdc" then
     OnFdcPlaced(event)
-  elseif event.created_entity.name == "mortar-81" then
-    OnGunPlaced(event)
+  else
+    for _,g in pairs(guns) do
+      if event.created_entity.name == g.entity_name then
+        OnGunPlaced(event)
+      end
+    end
   end
 end)
 

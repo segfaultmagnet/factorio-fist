@@ -333,7 +333,6 @@ end
 
 -- Post: Executes fire mission against currently selected TRP.
 function OnFireButton(player_index)
-  local gun_type = TESTING_GUN_TYPE
   local round_type = "HE"
   local round_count = 0
   local trp_ctrl = game.players[player_index].gui.left.trp_ctrl
@@ -362,7 +361,7 @@ function OnFireButton(player_index)
 
     -- Call the fire mission(s).
     if #global.new_fire_missions > 0 then
-      EvaluateNewFireMissions(player_index, gun_type, round_type, round_count)
+      EvaluateNewFireMissions(player_index, round_type, round_count)
       fire_button_disable = FIRE_LOCKOUT
     end
 

@@ -6,6 +6,10 @@ data:extend(
   },
   {
     type = "ammo-category",
+    name = "howitzer-155"
+  },
+  {
+    type = "ammo-category",
     name = "mortar-81"
   },
   {
@@ -40,13 +44,45 @@ data:extend(
   },
   {
     type = "ammo",
+    name = "howitzer-155-he",
+    icon = "__FIST__/graphics/icons/howitzer-155-he.png",
+    flags = {"goes-to-main-inventory"},
+    subgroup = "ammo",
+    order = "d[howitzer-155]-a[he]",
+    stack_size = 100,
+    ammo_type =
+    {
+      category = "howitzer-155",
+      clamp_position = true,
+      target_type = "position",
+      action =
+      {
+        type = "direct",
+        action_delivery =
+        {
+          type = "projectile",
+          projectile = "howitzer-155-he",
+          starting_speed = 0.2,
+          direction_deviation = 0.3,
+          range_deviation = 0.3,
+          max_range = 1500,
+          source_effects =
+          {
+            type = "create-explosion",
+            entity_name = "gunshot-howitzer"
+          }
+        }
+      }
+    }
+  },
+  {
+    type = "ammo",
     name = "mortar-81-he",
     icon = "__FIST__/graphics/icons/mortar-81-he.png",
     flags = {"goes-to-main-inventory"},
     subgroup = "ammo",
     order = "d[mortar-81]-a[he]",
     stack_size = 100,
-    fuel_value = "81kJ",
     ammo_type =
     {
       category = "mortar-81",

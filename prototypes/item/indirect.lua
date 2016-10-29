@@ -12,6 +12,16 @@ data:extend(
   },
   {
     type = "item",
+    name = "howitzer-155",
+    icon = "__FIST__/graphics/icons/howitzer-155.png",
+    flags = {"goes-to-quickbar"},
+    subgroup = "defensive-structure",
+    order = "b[turret]-a[howitzer-155]",
+    place_result = "howitzer-155",
+    stack_size = 50
+  },
+  {
+    type = "item",
     name = "mortar-81",
     icon = "__FIST__/graphics/icons/mortar-81.png",
     flags = {"goes-to-quickbar"},
