@@ -21,7 +21,7 @@ Sprites!
 ----------------------------------------
 --]]
 
-DEBUG = true
+local DEBUG = true
 
 require("stdlib.area.position")
 require("stdlib.event.event")
@@ -32,23 +32,33 @@ require("config")
 require("fist")
 require("gui")
 
--- Table of Fire Direction Centers and counters for naming.
-global.fdc = {}
-global.fdc_cooldown = {}
-
--- Table of Target Reference Points and counters for naming.
-global.trp = {}
-global.trp_counter = {1, 1, -1}
-
--- Table of queued Fire Missions.
-global.new_fire_missions = {}
-global.assigned_fire_missions = {}
-
 -- Used to temporarily lock out the Fire button.
-fire_button_disable = 0
+local fire_button_disable = 0
 
 local new_trp_player_index = nil
 local new_trp_pos = nil
+
+function SetupTables()
+  -- Table of Fire Direction Centers and counters for naming.
+  global.fdc = {}
+  global.fdc_cooldown = {}
+
+  -- Table of Target Reference Points and counters for naming.
+  global.trp = {}
+  global.trp_counter = {1, 1, -1}
+
+  -- Table of queued Fire Missions.
+  global.new_fire_missions = {}
+  global.assigned_fire_missions = {}
+end
+
+script.on_init(function()
+  SetupTables()
+end)
+
+script.on_configuration_changed(function(data)
+  SetupTables()
+end)
 
 -- Check for newly-created players.
 Event.register(defines.events.on_player_created, function(event)
