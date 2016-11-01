@@ -145,6 +145,13 @@ Event.register(defines.events.on_player_mined_item, function(event)
   end
 end)
 
+-- Check for mined FDCs.
+Event.register(defines.events.on_robot_mined, function(event)
+  if event.item_stack.name == "fdc" then
+    OnFdcMined(event)
+  end
+end)
+
 -- Handling for GUI checkboxes.
 Event.register(defines.events.on_gui_checked_state_changed, function(event)
   local element = event.element
