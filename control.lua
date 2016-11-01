@@ -120,7 +120,7 @@ end)
 
 -- Check for newly-built FDCs and guns.
 Event.register(defines.events.on_robot_built_entity, function(event)
-  if event.entity.name == "fdc" then
+  if event.created_entity.name == "fdc" then
     OnFdcPlaced(event)
   else
     for _,g in pairs(guns) do
