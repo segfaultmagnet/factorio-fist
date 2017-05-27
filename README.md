@@ -6,6 +6,8 @@ Includes Factorio-Stdlib (https://github.com/Afforess/Factorio-Stdlib).
 
 ## To-Do
 
+Davy Crockett.
+
 Clean up GUI: implement functions to add/remove TRP from list without requiring
 a complete refresh.
 
